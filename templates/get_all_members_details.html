@@ -1,0 +1,98 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Space | About {{user_username}}</title>
+    <link rel="icon" href="{% static 'image/logo.png' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <style>
+        .text {
+            text-transform: uppercase;
+                font-family: verdana;
+                font-size: 20px;
+                font-weight: 700;
+                color: #f5f5f5;
+                text-shadow: 1px 1px 1px #919191,
+                    1px 2px 1px #919191,
+                    1px 3px 1px #919191,
+                    1px 4px 1px #919191,
+                    1px 5px 1px #919191,
+                    1px 6px 1px #919191,
+                    1px 7px 1px #919191,
+                    1px 8px 1px #919191,
+                    1px 9px 1px #919191,
+                    1px 10px 1px #919191,
+                1px 18px 6px rgba(16,16,16,0.4),
+                1px 22px 10px rgba(16,16,16,0.2),
+                1px 25px 35px rgba(16,16,16,0.2),
+                1px 30px 60px rgba(16,16,16,0.4);
+        }
+    </style>
+</head>
+
+
+<body style="background-color:#131311">
+
+
+    <!-- Navbar for Medium and Bigger Screen Sizes -->
+  <div class="top-navbar d-md-flex p-3 justify-content-center" style="background-color:#c9bf0b">
+    <a href="{% url 'admin_private_space_page' %}" style="text-decoration:none"><b id="gtt">GTT</b></a>
+  </div>
+  <!-- End of Larger Screen Navbar -->
+
+
+
+  <main class="text-center bg-dark text-white">
+
+
+    <div class="text-center my-5">
+        <h1 class="text-center text-primary text mb-3">All Members Information</h1>
+
+        {% for i in all_members %}
+            <l>
+                <li>
+                    <hr style="width:100%;height:100px;color:white">
+                    <table class="w-100 p-5">
+                            <tr>
+                                <th class="text text-secondary">Username</th>
+                                <td class=" text-danger">{{i.user}}</td>
+                            </tr>
+                            <tr>
+                                <th class="text text-secondary">Initial Password</th>
+                                <td class=" text-danger">{{i.initial_password}}</td>
+                            </tr>
+                            <tr>
+                                <th class="text text-secondary">Balance</th>
+                                <td class=" text-primary">#{{i.balance}}</td>
+                            </tr>
+                    </table>
+                    <hr style="width:100%;height:100px;color:white">
+                </li>
+            </l>
+        {% endfor %}
+
+        <hr>
+
+    </div>
+  </main>
+
+
+
+  <!-- Bottom Navbar -->
+    <div class="bottom-navbar justify-content-center" style="background-color:#c9bf0b">
+      <a href="{% url 'home_page' %}"  class="btn btn-outline-dark"><i class="fa fa-home display-6" aria-hidden="true" title="home"></i><br><b>Home</b></a>
+  </div>
+    <!-- End of Bottom Navbar -->
+
+
+<!--    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.1/dist/jquery.slim.min.js"></script>-->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

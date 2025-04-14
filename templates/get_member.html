@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Space | About {{user_username}}</title>
+    <link rel="icon" href="{% static 'image/logo.png' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+</head>
+
+
+<body style="background-color:#131311">
+
+
+    <!-- Navbar for Medium and Bigger Screen Sizes -->
+  <div class="top-navbar d-md-flex p-3 justify-content-center" style="background-color:#c9bf0b">
+    <a href="{% url 'admin_private_space_page' %}" style="text-decoration:none"><b id="gtt">GTT</b></a>
+  </div>
+  <!-- End of Larger Screen Navbar -->
+
+
+
+  <main class="text-center bg-dark text-white">
+
+
+    <div class="text-center my-5">
+        <h1 class="text-center text-primary display-6 mb-3">About '{{user_username}}'</h1>
+
+        <table class="w-100 p-5">
+            <tr>
+                <th class="text-secondary">User ID</th>
+                <td class="p-3 display-6 text-danger">{{user_id}}</td>
+            </tr>
+            <tr>
+                <th class="text-secondary">Username</th>
+                <td class="p-3 display-6 text-danger">{{user_username}}</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">First Name</th>
+                <td class="p-3 display-6 text-danger">{{user_first_name}}</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">Last Name</th>
+                <td class="p-3 display-6 text-danger">{{user_last_name}}</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">Email</th>
+                <td class="p-3 display-6 text-danger">{{user_email}}</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">Gender</th>
+                <td class="p-3 display-6 text-danger">{{user_gender}}</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">Balance</th>
+                <td class="p-3 display-6 text-danger">#{{user_balance}}</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">Admin Charge</th>
+                <td class="p-3 display-6 text-danger display-6 text-danger">#{{user_admin_charges}}</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">Number Of Play</th>
+                <td class="p-3 display-6 text-danger display-6 text-danger">{{user_number_of_play}}</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">Number Of Win</th>
+                <td class="p-3 display-6 text-danger display-6 text-danger">{{user_number_of_win}}</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">Number Of Draw</th>
+                <td class="p-3 display-6 text-danger display-6 text-danger">{{user_number_of_draw}}</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">Number Of Loss</th>
+                <td class="p-3 display-6 text-danger display-6 text-danger">{{user_number_of_loss}}</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">Win Ratio</th>
+                <td class="p-3 display-6 text-danger display-6 text-danger">{{user_win_ratio}}%</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">Game Started</th>
+                <td class="p-3 display-6 text-danger">{{user_game_started}}</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">Current Game Id</th>
+                <td class="p-3 display-6 text-danger">{{user_current_game_id}}</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">Current Game Opponent</th>
+                <td class="p-3 display-6 text-danger">{{user_current_opponent}}</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">Number Of Reports</th>
+                <td class="p-3 display-6 text-danger">{{user_number_of_reports}}</td>
+            </tr>
+            <tr>
+                <th class="p-3 text-secondary">WhatsApp Link</th>
+                <td class="p-3 display-6 text-danger"><a class="btn btn-outline-warning" href="{{user_whatsapp_link}}">Chat '{{user_username}}' on WhatsApp</a></td>
+            </tr>
+        </table>
+
+        <hr>
+        <h1 class="display-6 text-danger">{{user_username}} Transaction History</h1>
+            <table class="table">
+              <thead class="table-light">
+                <tr>
+                  <th>From</th>
+                  <th>Amount</th>
+                  <th>Transaction Type</th>
+                  <th>To</th>
+                  <th>Status</th>
+                  <th>Transaction Charges</th>
+                  <th>Date</th>
+                  <th>Net Balance</th>
+                </tr>
+              </thead>
+            {% for i in user_transfer_history reversed %}
+              {% if i.transaction_type == "Credit" %}
+                <tbody class="bg-success">
+                  <tr>
+                    <td class="p-4">{{i.sender_name}}</td>
+                    <td class="p-4">#{{i.amount}}</td>
+                    <td class="p-4">Credit</td>
+                    <td class="p-4">YOU</td>
+                    <td class="p-4"><i class="fa fa-check text-warning" aria-hidden="true"><br>Received</i></td>
+                    <td class="p-4">-</td>
+                    <td class="p-4">{{i.transaction_date}}</td>
+                    <td class="p-3" style="font-size:12px">#{{i.net_balance}}</td>
+                  </tr>
+                </tbody>
+             {% else %}
+                <tbody class="bg-danger" >
+                  <tr>
+                    <td class="p-4">YOU</td>
+                    <td class="p-4">#{{i.amount}}</td>
+                    <td class="p-4">Debit</td>
+                    <td class="p-4">{{i.receiver_name}}</td>
+                    <td class="p-4"><i class="fa fa-check text-warning" aria-hidden="true"><br>Sent</i></td>
+                    <td class="p-4">#{{i.charges}}</td>
+                    <td class="p-4">{{i.transaction_date}}</td>
+                    <td class="p-3" style="font-size:12px">#{{i.net_balance}}</td>
+                  </tr>
+                </tbody>
+              {% endif %}
+            {% endfor %}
+          </table>
+    </div>
+  </main>
+
+
+
+  <!-- Bottom Navbar -->
+    <div class="bottom-navbar justify-content-center" style="background-color:#c9bf0b">
+      <a href="{% url 'home_page' %}"  class="btn btn-outline-dark"><i class="fa fa-home display-6" aria-hidden="true" title="home"></i><br><b>Home</b></a>
+  </div>
+    <!-- End of Bottom Navbar -->
+
+
+<!--    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.1/dist/jquery.slim.min.js"></script>-->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
