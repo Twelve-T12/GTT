@@ -1,4 +1,4 @@
-function opponentDelay(){
+function updateAllowReload(){
         $.ajax({
             type:"POST",
             url:"/game/opponentDelayReport",
@@ -34,7 +34,7 @@ function submitCard(id,card_shape,card_number,player){
         data:{
                 csrfmiddlewaretoken:$("input[name=csrfmiddlewaretoken]").val()
             },
-        success:function(){
+        success:function(r){
             location.reload();
         },
         error:function(){
@@ -81,32 +81,32 @@ function countCards(){
 }
 
 //checking game reload
-$(document).ready(function(){
-    setInterval(function(){
-        $.ajax({
-            type:"GET",
-            url:"/gttWhott/gttWhot/check/gameReload",
-            success:function(data){
-                if(data === "True"){
-                    location.reload();
-                    $.ajax({
-                        type:"GET",
-                        url:"/gttWhott/gttWhot/update/gameReload",
-                        success:function(data){
-                            location.reload();
-                        },
-                        error:function(){
-                            location.reload(true);
-                        }
-                    });
-                };
-            },
-            error:function(){
-                location.reload(true);
-            }
-        })
-    },1000)
-})
+//$(document).ready(function(){
+//    setInterval(function(){
+//        $.ajax({
+//            type:"GET",
+//            url:"/gttWhott/gttWhot/check/gameReload",
+//            success:function(data){
+//                if(data === "True"){
+//                    location.reload();
+//                    $.ajax({
+//                        type:"GET",
+//                        url:"/gttWhott/gttWhot/update/gameReload",
+//                        success:function(data){
+//                            location.reload();
+//                        },
+//                        error:function(){
+//                            location.reload(true);
+//                        }
+//                    });
+//                };
+//            },
+//            error:function(){
+//                location.reload(true);
+//            }
+//        })
+//    },1000)
+//})
 
 
 //End Game

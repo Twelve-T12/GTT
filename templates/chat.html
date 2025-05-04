@@ -1,0 +1,597 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat Room - GoldenTwelve</title>
+  <link rel="icon" href="{% static 'image/logo.png' %}">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      padding-top: 80px;
+      padding-bottom: 80px;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: #1f1f1f;
+      border-bottom: 1px solid #333;
+      z-index: 1000;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar-brand {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: orange;
+      text-shadow: 2px 2px #000;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .navbar-brand .slogan {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #ffe6b3;
+      text-shadow: 1px 1px #000;
+      animation: fadeInGlow 3s ease-in-out infinite alternate;
+      letter-spacing: 1px;
+    }
+
+    @keyframes fadeInGlow {
+      0% {
+        opacity: 0.4;
+        text-shadow: 0 0 5px orange, 0 0 10px gold, 0 0 15px darkorange;
+      }
+      100% {
+        opacity: 1;
+        text-shadow: 0 0 10px orange, 0 0 20px gold, 0 0 30px orangered;
+      }
+    }
+
+    .balance-box {
+      background-color: #2c2c2c;
+      color: #fff;
+      font-weight: bold;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .gold-icon {
+      animation: spin 3s linear infinite;
+      font-size: 1rem;
+      color: gold;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .add-money-icon {
+      background-color: orange;
+      border: none;
+      color: #121212;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: 0.3s;
+    }
+
+
+    .balance-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-orange {
+      background: linear-gradient(to right, orange, orangered);
+      border: none;
+      color: #121212;
+      font-weight: bold;
+      border-radius: 8px;
+    }
+
+    .btn-orange:hover {
+      background: linear-gradient(to right, darkorange, orange);
+    }
+
+    .empty-chat-card {
+      background-color: #1d1d1d;
+      border: 1px solid #333;
+      border-radius: 15px;
+      padding: 40px 20px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(255, 165, 0, 0.05);
+    }
+
+    .empty-chat-card i {
+      font-size: 3.5rem;
+      color: #ffaa33;
+      margin-bottom: 20px;
+    }
+
+    .empty-chat-card h5 {
+      color: #ffcc80;
+      margin-bottom: 10px;
+    }
+
+    .empty-chat-card p {
+      color: #999;
+      font-size: 0.95rem;
+      max-width: 350px;
+      margin: 0 auto 20px auto;
+    }
+
+    .start-chat-btn {
+      background-color: orange;
+      color: #121212;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 1rem;
+      box-shadow: 0 0 10px orange;
+      transition: 0.3s;
+    }
+
+    .start-chat-btn:hover {
+      background-color: gold;
+      box-shadow: 0 0 20px gold;
+      transform: scale(1.05);
+    }
+
+    .chat-container {
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .chat-card {
+      background-color: #1d1d1d;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: flex-start;
+      transition: background 0.3s;
+    }
+
+    .chat-card:hover {
+      background-color: #2b2b2b;
+    }
+
+    .chat-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: orange;
+      color: #121212;
+      font-weight: bold;
+      font-size: 1.4rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 15px;
+      flex-shrink: 0;
+    }
+
+    .chat-content {
+      flex-grow: 1;
+    }
+
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .chat-username {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: gold;
+    }
+
+    .chat-time {
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    .chat-message {
+      font-size: 0.95rem;
+      color: #ccc;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #1f1f1f;
+      border-top: 1px solid #333;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      z-index: 999;
+    }
+
+    .bottom-nav a i {
+      color: orange;
+      font-size: 1.4rem;
+    }
+
+    /* Bell ring animation */
+    .fa-bell.ringing {
+      animation: bellRing 1.5s ease-in-out infinite;
+      transform-origin: top center;
+    }
+
+    @keyframes bellRing {
+      0% { transform: rotate(0deg); }
+      10% { transform: rotate(-15deg); }
+      20% { transform: rotate(15deg); }
+      30% { transform: rotate(-12deg); }
+      40% { transform: rotate(12deg); }
+      50% { transform: rotate(-8deg); }
+      60% { transform: rotate(8deg); }
+      70% { transform: rotate(-4deg); }
+      80% { transform: rotate(4deg); }
+      90% { transform: rotate(-2deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+
+    /* Chat message bounce animation */
+    .fa-comment.message-alert {
+      animation: messageBounce 1.2s infinite;
+      transform-origin: center;
+    }
+
+    @keyframes messageBounce {
+      0%, 100% { transform: translateY(0); }
+      25% { transform: translateY(-4px); }
+      50% { transform: translateY(2px); }
+      75% { transform: translateY(-2px); }
+    }
+  </style>
+</head>
+<body>
+{% csrf_token %}
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="navbar-brand">
+      GoldenTwelve
+      <small class="slogan text-center">Let's play gold...</small>
+    </div>
+    <div class="balance-section">
+      <div class="balance-box">
+        <i class="fas fa-coins gold-icon"></i> {{balance}}
+      </div>
+      <button class="add-money-icon" data-bs-toggle="modal" data-bs-target="#depositModal" title="Add Money">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+  </div>
+
+    <!-- Deposit Modal -->
+  <div class="modal fade" id="depositModal" tabindex="-1" aria-labelledby="depositModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-dark">
+        <div class="modal-header">
+          <h5 class="modal-title" id="depositModalLabel">
+            <i class="fas fa-coins gold-icon me-1"></i> Add Gold
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Your deposit form or content goes here -->
+          <p>Proceed to select your preferred deposit amount and payment method to fund your wallet.</p>
+          <a href="{% url 'make_deposit_page' %}" class="btn btn-orange w-100">Proceed</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Chat Content -->
+
+  {% if chats %}
+  <div id="chat_container">
+    {% for i in chats reversed %}
+    <div class="chat-container animate__animated animate__fadeInUp" style="cursor:pointer" onclick="getMessages({{i.id}},'{{i.chat_one}}','{{i.chat_two}}')" id="{{i.id}}">
+      <div class="chat-card">
+        <div class="chat-avatar"><i class="fas fa-user"></i></div>
+        <div class="chat-content">
+          <div class="chat-header">
+            {% if i.chat_one != request.user.username %}
+            <div class="chat-username">@{{i.chat_one}}</div>
+            {% elif i.chat_two != request.user.username %}
+            <div class="chat-username">@{{i.chat_two}}</div>
+            {% else %}
+            <div class="chat-username">@{{username}}(me)</div>
+            {% endif %}
+            <time class="chat-time time-ago" datetime="{{i.date_created|date:'c'}}" id="time_{{i.id}}">New Message</time>
+          </div>
+          <div class="chat-message" id="new_message_{{i.id}}" style="display:none">New Message!</div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+  </div>
+
+  {% else %}
+  <!-- Chat Content (Empty State in Card) -->
+  <div class="chat-container animate__animated animate__fadeInUp">
+    <div class="empty-chat-card">
+      <i class="fas fa-comment-dots animate__animated animate__fadeInDown"></i>
+      <h5>No chats yet</h5>
+      <p>Start a conversation and let the games begin!</p>
+      <a href="{% url 'home_page' %}" class="start-chat-btn mt-3" style="text-decoration:none">Start Chat</a>
+    </div>
+  </div>
+  {% endif %}
+
+
+
+  <!-- Car Game Modal -- Show All Challenge Modal -->
+  <div class="modal fade" id="showGameModal" tabindex="-1" aria-labelledby="carGameModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-white animate__animated animate__fadeInDown rounded-4 p-3" style="border: 1px solid orange;">
+        <div class="modal-header border-0">
+          <h5 class="modal-title text-warning" id="carGameModalLabel">
+            <i class="fas fa-gamepad me-2 text-orange"></i>Game Invite
+          </h5>
+        </div>
+        <div class="modal-body text-center">
+          <p class="fs-5"><span class="text-warning fw-bold" id="show_challenger_username_modal">@lekan</span> wants to challenge you to a <span class="text-warning fw-bold" id="show_challenge_game_type_modal">Whot</span> game, with a stake of <span class="text-warning fw-bold" id="show_challenge_amount_modal">1,000 </span><i class="fas fa-coins gold-icon mx-2"></i>. Do you want to play?</p>
+          <div class="d-flex justify-content-center gap-3 mt-4">
+            <button class="btn btn-orange px-4 py-2 shadow" id="accept_challenge_button">
+              <i class="fas fa-gamepad me-1"></i> Accept
+            </button>
+            <button class="btn btn-secondary px-4 py-2 shadow" data-bs-dismiss="modal" id="decline_challenge_button">
+              <i class="fas fa-times me-1"></i> Decline
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+  <div class="bottom-nav">
+    <a href="{% url 'notification_alerts_page' %}"><i class="fas fa-bell" id="ringing"></i></a>
+    <a href="{% url 'chat_page' %}"><i class="fas fa-comment" id="chatting"></i></a>
+    <a href="{% url 'home_page' %}"><i class="fas fa-home"></i></a>
+    <a href="/profile/{{username}}"><i class="fas fa-user"></i></a>
+    <a href="/{{username}}/settings"><i class="fas fa-cog"></i></a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/timeago.js@4.0.2/dist/timeago.min.js"></script>
+  <script>
+    function getMessages(id,chat_one,chat_two){
+      window.location = `/message/${id}/${chat_one}/${chat_two}`;
+    }
+
+    timeago.render(document.querySelectorAll('.time-ago'))
+
+
+
+    function showChallenges(challenger,challenge_game,challenge_amount,challenge_id){
+  console.log("Called",challenger);
+  const showGameModal = new bootstrap.Modal(document.getElementById("showGameModal"));
+  var getModalChallengerUsername = document.getElementById("show_challenger_username_modal");
+  var getModalChallengeGameType = document.getElementById("show_challenge_game_type_modal");
+  var getModalChallengeAmount = document.getElementById("show_challenge_amount_modal");
+  var getModalAcceptBtn = document.getElementById("accept_challenge_button");
+  var getModalDeclineBtn = document.getElementById("decline_challenge_button");
+
+
+  getModalAcceptBtn.setAttribute('onclick',`acceptChallenge('${challenge_id}')`);
+  getModalDeclineBtn.setAttribute('onclick',`declineChallenge('${challenge_id}')`);
+  getModalChallengerUsername.innerText = `@${challenger}`;
+  getModalChallengeGameType.innerText = `${challenge_game}`;
+  getModalChallengeAmount.innerText = `${challenge_amount}`;
+  showGameModal.show();
+}
+
+
+  function acceptChallenge(id){
+        $.ajax({
+            type:"POST",
+            url:"/accept/challenge",
+            data:{
+                csrfmiddlewaretoken:$("input[name=csrfmiddlewaretoken]").val(),
+                challenge_id:id
+            },
+            success:function(){
+                location.reload()
+            },
+            error:function(){
+                location.reload()
+            }
+        })
+}
+
+
+
+
+function declineChallenge(id){
+        $.ajax({
+            type:"POST",
+            url:"/decline/challenge",
+            data:{
+                csrfmiddlewaretoken:$("input[name=csrfmiddlewaretoken]").val(),
+                challenge_id:id
+            },
+            success:function(){
+                location.reload()
+            },
+            error:function(){
+                location.reload()
+            }
+        })
+}
+
+
+
+    function getChat(chat_one,chat_two,date,id,seen,last_sender){
+      console.log("get chat");
+      const time = new Date(date).toISOString();
+      let tem = "";
+      console.log(seen)
+      if (chat_one != "{{username}}") {
+          tem = `
+            <div class="chat-container animate__animated animate__fadeInUp" style="cursor:pointer" onclick="getMessages(${id},'${chat_one}','${chat_two}')" id="${id}">
+              <div class="chat-card">
+                <div class="chat-avatar"><i class="fas fa-user"></i></div>
+                <div class="chat-content">
+                  <div class="chat-header">
+                    <div class="chat-username">${chat_one}</div>
+                    <time class="chat-time time-ago" datetime="${time}" id="time_${id}">${timeago.format(time)}</time>
+                  </div>
+                  <div class="chat-message" id="new_message_${id}">New Message!</div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (chat_two != "{{username}}") {
+          tem = `
+            <div class="chat-container animate__animated animate__fadeInUp" style="cursor:pointer" onclick="getMessages(${id},'${chat_one}','${chat_two}')" id="${id}">
+              <div class="chat-card">
+                <div class="chat-avatar"><i class="fas fa-user"></i></div>
+                <div class="chat-content">
+                  <div class="chat-header">
+                    <div class="chat-username">${chat_two}</div>
+                    <time class="chat-time time-ago" datetime="${time}" id="time_${id}">${timeago.format(time)}</time>
+                  </div>
+                  <div class="chat-message" id="new_message_${id}" style="display:none">New Message!</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }else{
+          const user = "{{username}}";
+          tem = `
+            <div class="chat-container animate__animated animate__fadeInUp" style="cursor:pointer" onclick="getMessages(${id},'${chat_one}','${chat_two}')" id="${id}">
+              <div class="chat-card">
+                <div class="chat-avatar"><i class="fas fa-user"></i></div>
+                <div class="chat-content">
+                  <div class="chat-header">
+                    <div class="chat-username">@${user}(me)</div>
+                    <time class="chat-time time-ago" datetime="${time}" id="time_${id}">${timeago.format(time)}</time>
+                  </div>
+                  <div class="chat-message" id="new_message_${id}" style="display:none">New Message!</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        if('{{username}}' !== last_sender){
+            if(seen){
+                console.log("DDaa");
+                var getTime = document.getElementById(`time_${id}`);
+                var getNewMessage = document.getElementById(`new_message_${id}`);
+                getTime.style.display = "block";
+                getNewMessage.style.display = "none";
+            }else{
+                console.log(`time_${id}`);
+                var getTime = document.getElementById(`time_${id}`);
+                var getNewMessage = document.getElementById(`new_message_${id}`);
+                getTime.style.display = "none";
+                getNewMessage.style.display = "block";
+            }
+        }
+        if (document.getElementById(id)) {
+      console.log("Chat already exists", id);
+      return;
+    }
+        $("#chat_container").append(tem);
+
+  }
+
+  function newChatNotification(seen,last_sender){
+    if('{{username}}' !== last_sender){
+        if(seen){
+            console.log("remove from chat");
+            var getChatAlert = document.getElementById("chatting");
+            getChatAlert.classList.remove("message-alert");
+        }else{
+            console.log(`add to chat`);
+            var getChatAlert = document.getElementById("chatting");
+            getChatAlert.classList.add("message-alert");
+        }
+    }
+  };
+
+    <!--  SSE CONNECTION-->
+  const sse = new EventSource("/events/");
+  sse.onmessage = function(event){
+    try{
+      const data = JSON.parse(event.data);
+      if(data.type == "first_n"){
+        console.log(data.username);
+        console.log(data.balance);
+      }else if( data.type == "check_member_has_game" ){
+          window.location = "/checkGame";
+      }
+      else if( data.type == "member_challenges" ){
+        data.data.forEach(e  => {
+          showChallenges(e.challenger,e.challenge_game_type,e.amount,e.id);
+        })
+      }
+      else if( data.type == "notification"){
+        var getNotificationIcon = document.getElementById("ringing");
+        getNotificationIcon.classList.add("ringing");
+      }
+      else if( data.type == "chats" ){
+        data.chats.forEach(e  => {
+          console.log(e.date_created);
+          getChat(e.chat_one,e.chat_two,e.date_created,e.id,e.last_message_seen,e.last_sender);
+          newChatNotification(e.last_message_seen,e.last_sender);
+      })
+      }
+      else if( data.type == "second_n"){
+        data.data.forEach(e => {
+          console.log(e.balance)
+        })
+      }
+    }
+    catch(err){
+      console.log("Failed to parse message");
+      location.reload();
+    }
+  };
+
+
+  sse.onerror = function(e){
+    console.log("SSE CONNECTION ERROR",e)
+  };
+  </script>
+</body>
+</html>

@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'game.apps.GameConfig',
     'private.apps.PrivateConfig',
-    'gttWhott'
+    'gttWhott',
+    'payments.apps.PaymentsConfig',
 ]
 
 MIDDLEWARE = [
@@ -149,3 +150,8 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_USE_TLS = env("EMAIL_USE_TLS")
+
+
+# Paystack Payment Integration
+PAYSTACK_PUBLIC_KEY = env("PAYSTACK_PUBLIC_KEY")
+PAYSTACK_SECRET_KEY = env("PAYSTACK_SECRET_KEY")

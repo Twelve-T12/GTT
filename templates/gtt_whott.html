@@ -9,30 +9,137 @@
     <link rel="icon" href="{% static 'image/logo.png' %}">
     <link rel="stylesheet" href="{% static 'css/gtt_whott.css' %}">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
     <style>
-        .text {
-            text-transform: uppercase;
-                font-family: verdana;
-                font-size: 20px;
-                font-weight: 700;
-                color: #f5f5f5;
-                text-shadow: 1px 1px 1px #919191,
-                    1px 2px 1px #919191,
-                    1px 3px 1px #919191,
-                    1px 4px 1px #919191,
-                    1px 5px 1px #919191,
-                    1px 6px 1px #919191,
-                    1px 7px 1px #919191,
-                    1px 8px 1px #919191,
-                    1px 9px 1px #919191,
-                    1px 10px 1px #919191,
-                1px 18px 6px rgba(16,16,16,0.4),
-                1px 22px 10px rgba(16,16,16,0.2),
-                1px 25px 35px rgba(16,16,16,0.2),
-                1px 30px 60px rgba(16,16,16,0.4);
-        }
+        body {
+      background-color: #1f1f1f;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      padding-top: 80px;
+      padding-bottom: 140px;
+    }
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: #1f1f1f;
+      border-bottom: 1px solid #333;
+      z-index: 1000;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar-brand {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: orange;
+      text-shadow: 2px 2px #000;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .navbar-brand .slogan {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #ffe6b3;
+      text-shadow: 1px 1px #000;
+      animation: fadeInGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes fadeInGlow {
+      0% { opacity: 0.4; text-shadow: 0 0 5px orange, 0 0 10px gold, 0 0 15px darkorange; }
+      100% { opacity: 1; text-shadow: 0 0 10px orange, 0 0 20px gold, 0 0 30px orangered; }
+    }
+
+    .info-card {
+      background-color: #1f1f1f;
+      border-radius: 15px;
+      padding: 10px;
+      box-shadow: 0 0 15px rgba(255, 140, 0, 0.2);
+      margin-bottom: 30px;
+    }
+
+    .text-label {
+      font-weight: 0.99rem;
+      color: #bbb;
+      margin-top: 8px;
+    }
+
+    .text-value {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .gold-icon {
+      animation: spin 3s linear infinite;
+      font-size: 1rem;
+      color: gold;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+
+    .game-tips {
+      background-color: #1f1f1f;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .game-tips h5 {
+      color: orange;
+      margin-bottom: 10px;
+    }
+
+    .game-tips ul {
+      padding-left: 18px;
+    }
+
+    .game-tips li {
+      margin-bottom: 8px;
+      color: #ddd;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #1f1f1f;
+      border-top: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 30px;
+      z-index: 999;
+    }
+
+    .bottom-nav .player {
+      text-align: center;
+      flex: 1;
+    }
+
+    .bottom-nav .player span {
+      display: block;
+      color: #bbb;
+      font-size: 0.85rem;
+    }
+
+    .bottom-nav .player strong {
+      color: orange;
+    }
+
+
+
 
         .auth{
                 background-color: #2c90c6;
@@ -53,14 +160,91 @@
                 background-color: #2c70c6;
                 box-shadow: 2px 2px 20px  #2c90c6, #fff 0 -1px 2px;
             }
+
+    .black-btn {
+      background-color: black;
+      color: white;
+      border: 1px solid white;
+      border-radius:20px;
+      padding: 5px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ccc;
+      transition: all 0.3s ease;
+    }
+
+    .black-btn:hover {
+      color: white;
+      border-color: #ccc;
+      box-shadow: 0 0 10px #ccc;
+    }
+
+    .winner-text {
+      font-size: 32px;
+      font-weight: 800;
+      color: gold;
+      background: linear-gradient(to right, #000, #222);
+      padding: 20px;
+      border: 2px solid gold;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 0 20px gold;
+      max-width: 400px;
+      margin: 50px auto;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 20px gold; }
+      50% { box-shadow: 0 0 40px gold; }
+      100% { box-shadow: 0 0 20px gold; }
+    }
+
+    .loss-text {
+      font-size: 30px;
+      font-weight: bold;
+      color: #ff4c4c;
+      background-color: #1a1a1a;
+      padding: 20px;
+      border: 2px solid #ff4c4c;
+      border-radius: 10px;
+      text-align: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      box-shadow: 0 0 15px #ff4c4c;
+      max-width: 400px;
+      margin: 50px auto;
+      animation: shake 0.5s infinite alternate;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
     </style>
 </head>
 
 
-<body style="background-color:#131311">
+<body>
+
+    <!-- Header -->
+<div class="navbar">
+  <div class="navbar-brand">
+    GoldenTwelve
+    <small class="slogan">Let's play gold...</small>
+  </div>
+  <div>
+    <i class="fas fa-gamepad fa-xl text-warning"></i>
+  </div>
+</div>
+
+<div class="game-section">
 
 
-  <main class="text-center bg-dark text-white" style="text-shadow: 4px 4px 2px rgba(248,48,48,0.6);">
+  <main class="text-center text-white">
     {% csrf_token %}
 
     <div class="text-center">
@@ -73,15 +257,15 @@
             {% endif %}
             {% if not counted_cards %}
                 {% if opp_number_of_cards > 2 %}
-                    <p class="text text-center text-warning" style="font:30px italic;text-shadow: 4px 4px 2px rgba(248,48,48,0.6);">{{opponent}} <b class="text-secondary">Remaining Cards <i class="text text-warning" id="opp_number_of_card_one">'{{opp_number_of_cards}}'</i></b></p>
+                    <p class="text text-center text-warning" style="font:0.99rem italic;">@{{opponent}} <b class="text-secondary">Remaining Cards <i class="text text-warning" id="opp_number_of_card_one">'{{opp_number_of_cards}}'</i></b></p>
                 {% elif opp_number_of_cards == 1 %}
-                    <p class="text text-center text-warning" style="font:30px italic;text-shadow: 4px 4px 2px rgba(248,48,48,0.6);">{{opponent}} <b class="text-secondary">Remaining Cards <i class="text text-danger">'Last Card'</i></b></p>
+                    <p class="text text-center text-warning" style="font:0.99rem italic;">@{{opponent}} <b class="text-secondary">Remaining Cards <i class="text text-danger">'Last Card'</i></b></p>
                 {% else %}
-                    <p class="text text-center text-warning" style="font:30px italic;text-shadow: 4px 4px 2px rgba(248,48,48,0.6);">{{opponent}} <b class="text-secondary">Remaining Cards <i class="text text-danger" id="opp_number_of_card_two">'{{opp_number_of_cards}}'</i></b></p>
+                    <p class="text text-center text-warning" style="font:0.99rem italic;">@{{opponent}} <b class="text-secondary">Remaining Cards <i class="text text-danger" id="opp_number_of_card_two">'{{opp_number_of_cards}}'</i></b></p>
                 {% endif %}
             {% else %}
                 <div class="table-responsive">
-                    <table class="table table-dark">
+                    <table class="table">
                         {% if player_one == user.username %}
                             <tr>
                                 {% for i in player_two_cards reversed %}
@@ -106,16 +290,16 @@
                     </table>
                 </div>
                 {% if opp_number_of_cards > 2 %}
-                    <p class="text-center text-warning" style="font:30px italic">{{opponent}} <b class="text-secondary">Remaining Cards <i class="text-warning">'{{opp_number_of_cards}}'</i></b></p>
+                    <p class="text-center text-warning" style="font:0.99rem italic;">@{{opponent}} <b class="text-secondary">Remaining Cards <i class="text-warning">'{{opp_number_of_cards}}'</i></b></p>
                 {% elif opp_number_of_cards == 1 %}
-                    <p class="text-center text-warning" style="font:30px italic">{{opponent}} <b class="text-secondary">Remaining Cards <i class="text-danger">'Last Card'</i></b></p>
+                    <p class="text-center text-warning" style="font:0.99rem italic;">@{{opponent}} <b class="text-secondary">Remaining Cards <i class="text-danger">'Last Card'</i></b></p>
                 {% else %}
-                    <p class="text-center text-warning" style="font:30px italic">{{opponent}} <b class="text-secondary">Remaining Cards <i class="text-danger">'{{opp_number_of_cards}}'</i></b></p>
+                    <p class="text-center text-warning" style="font:0.99rem italic;">@{{opponent}} <b class="text-secondary">Remaining Cards <i class="text-danger">'{{opp_number_of_cards}}'</i></b></p>
                 {% endif %}
             {% endif %}
         </div>
 
-        <hr>
+
 
         <div id="game_space" class="bg-light p-3">
             {% if not game_finished %}
@@ -124,7 +308,7 @@
                         {% if not has_tie %}
                             <div class="row">
                                     <div class="col-4">
-                                        <p class="text text-dark" style="font-size:20px">General Market</p>
+                                        <p class="text text-dark" style="font:0.99rem;">General Market</p>
                                         {% if to_play == user.username %}
                                             <button class="card-button general-market" style="border:0px solid white" onclick="generalMarket()"><img src="{% static 'image/gtt_whot_logo.png' %}" class="general-market" style="width:100px;height:100px;border-radius:20px;"></button>
                                         {% else %}
@@ -133,7 +317,7 @@
                                         <p class="text text-dark"  style="text-shadow:none" id="number_of_general_market">{{number_of_general_market}}</p>
                                     </div>
                                     <div class="col-4">
-                                        <p class="text text-dark" style="font-size:20px">Current</p>
+                                        <p class="text text-dark" style="font:0.99rem;">Current</p>
                                         {% for i in current_card %}
                                             <div id="current_card_space">
                                                 <img src="{{i.card_image.url}}" style="width:100px;height:100px;border-radius:20px">
@@ -141,12 +325,13 @@
                                             </div>
                                         {% endfor %}
                                     </div>
-                                    <div class="col-4">
-                                        <h2 class="text text-warning" >Stake Amount: <i class="text text-primary">#{{challenge_amount}}</i></h2>
-                                        <h2 class="text text-warning" >Potential Winning:<i class="text text-success"> #{{challenge_price}}</i></h2>
-<!--                                        <div id="game_timer">-->
-<!--                                            <p class="text-primary">Time Left:{{time_left}}</p>-->
-<!--                                        </div>-->
+                                    <div class="col-4 info-card">
+                                        <div class="info-item">
+                                            <div class="text-label" style="font:0.99rem;">Stake</div>
+                                            <div class="text-value" style="font:0.99rem;">₦{{challenge_amount}} <i class="fas fa-coins gold-icon mx-1"></i></div>
+                                            <div class="text-label mt-3" style="font:0.99rem;">Winning Potential</div>
+                                            <div class="text-value" style="font:0.99rem;">₦{{challenge_price}} <i class="fas fa-coins gold-icon mx-1"></i></div>
+                                        </div>
                                     </div>
                             </div>
                         {% else %}
@@ -165,15 +350,19 @@
                                         </div>
                                     </div>
                                     <div class="col-4">
-                                        <p class="text text-dark" style="font-size:20px;">Current</p>
+                                        <p class="text text-dark" style="font:0.99rem;">Current</p>
                                         {% for i in current_card %}
                                             <img src="{{i.card_image.url}}" style="width:100px;height:100px;border-radius:20px">
                                             <p class="text text-dark" style="font-size:15px">{{i.card_number}}..{{i.card_shape}}</p>
                                         {% endfor %}
                                     </div>
-                                    <div class="col-4">
-                                        <h2 class="text text-warning">Stake Amount: <i class="text text-primary">#{{challenge_amount}}</i></h2>
-                                        <h2 class="text text-warning">Potential Winning:<i class="text text-success"> #{{challenge_price}}</i></h2>
+                                    <div class="col-4 info-card">
+                                        <div class="info-item">
+                                            <div class="text-label" style="font:0.99rem;">Stake</div>
+                                            <div class="text-value" style="font:0.99rem;">₦{{challenge_amount}} <i class="fas fa-coins gold-icon mx-1"></i></div>
+                                            <div class="text-label mt-3" style="font:0.99rem;">Winning Potential</div>
+                                            <div class="text-value" style="font:0.99rem;">₦{{challenge_price}} <i class="fas fa-coins gold-icon mx-1"></i></div>
+                                        </div>
                                     </div>
                                 </div>
                             {% else %}
@@ -191,15 +380,19 @@
                                         </div>
                                     </div>
                                     <div class="col-4">
-                                        <p class="text text-dark" style="font-size:20px;">Current</p>
+                                        <p class="text text-dark" style="font:0.99rem;">Current</p>
                                         {% for i in current_card %}
                                             <img src="{{i.card_image.url}}" style="width:100px;height:100px;border-radius:20px;">
                                             <p class="text text-dark" style="font-size:15px">{{i.card_number}}..{{i.card_shape}}</p>
                                         {% endfor %}
                                     </div>
-                                    <div class="col-4">
-                                        <h2 class="text text-warning" >Stake Amount: <i class="text-warning text-primary">#{{challenge_amount}}</i></h2>
-                                        <h2 class="text text-warning" >Potential Winning:<i class="text-warning text-success"> #{{challenge_price}}</i></h2>
+                                    <div class="col-4 info-card">
+                                        <div class="info-item">
+                                            <div class="text-label" style="font:0.99rem;">Stake</div>
+                                            <div class="text-value" style="font:0.99rem;">₦{{challenge_amount}} <i class="fas fa-coins gold-icon mx-1"></i></div>
+                                            <div class="text-label mt-3" style="font:0.99rem;">Winning Potential</div>
+                                            <div class="text-value" style="font:0.99rem;">₦{{challenge_price}} <i class="fas fa-coins gold-icon mx-1"></i></div>
+                                        </div>
                                     </div>
                                 </div>
                             {% endif %}
@@ -208,7 +401,7 @@
                         {% if player_one == user.username %}
                                 <div class="row">
                                     <div class="col-4">
-                                        <p class="text-center text-primary text" style="font-size:25px;">Check Up!</p>
+                                        <p class="text-center text-primary text" style="font:0.99rem;">Check Up!</p>
                                         <a class="btn btn-outline-warning auth" id="count_card" onclick="countCards()" style="text-shadow:none">Count Cards</a>
                                         <div id="count_card_spinner" style="display:none">
                                         <div class="d-flex justify-content-center">
@@ -220,15 +413,19 @@
                                     </div>
                                     </div>
                                     <div class="col-4">
-                                        <p class="text text-dark" style="font-size:20px">Current</p>
+                                        <p class="text text-dark" style="font:0.99rem;">Current</p>
                                         {% for i in current_card %}
                                             <img src="{{i.card_image.url}}" style="width:100px;height:100px;border-radius:20px">
-                                            <p class="text text-dark" style="font-size:15px">{{i.card_number}}..{{i.card_shape}}</p>
+                                            <p class="text text-dark" style="font:0.99rem;">{{i.card_number}}..{{i.card_shape}}</p>
                                         {% endfor %}
                                     </div>
-                                    <div class="col-4">
-                                        <h2 class="text text-warning" >Stake Amount: <i class="text text-primary">#{{challenge_amount}}</i></h2>
-                                        <h2 class="text text-warning" >Potential Winning:<i class="text text-success"> #{{challenge_price}}</i></h2>
+                                    <div class="col-4 info-card">
+                                        <div class="info-item">
+                                            <div class="text-label" style="font:0.99rem;">Stake</div>
+                                            <div class="text-value" style="font:0.99rem;">₦{{challenge_amount}} <i class="fas fa-coins gold-icon mx-1"></i></div>
+                                            <div class="text-label mt-3" style="font:0.99rem;">Winning Potential</div>
+                                            <div class="text-value" style="font:0.99rem;">₦{{challenge_price}} <i class="fas fa-coins gold-icon mx-1"></i></div>
+                                        </div>
                                     </div>
                                 </div>
                         {% else %}
@@ -246,15 +443,19 @@
                                     </div>
                                     </div>
                                     <div class="col-4">
-                                        <p class="text text-dark" style="font-size:20px">Current</p>
+                                        <p class="text text-dark" style="font:0.99rem;">Current</p>
                                         {% for i in current_card %}
                                             <img src="{{i.card_image.url}}" style="width:100px;height:100px;border-radius:20px">
-                                            <p class="text text-dark" style="font-size:15px">{{i.card_number}}..{{i.card_shape}}</p>
+                                            <p class="text text-dark" style="font:0.99rem;">{{i.card_number}}..{{i.card_shape}}</p>
                                         {% endfor %}
                                     </div>
-                                    <div class="col-4">
-                                        <h2 class="text text-warning" >Stake Amount: <i class="text text-primary">#{{challenge_amount}}</i></h2>
-                                        <h2 class="text text-warning" >Potential Winning:<i class="text text-success"> #{{challenge_price}}</i></h2>
+                                    <div class="col-4 info-card">
+                                        <div class="info-item">
+                                            <div class="text-label" style="font:0.99rem;">Stake</div>
+                                            <div class="text-value" style="font:0.99rem;">₦{{challenge_amount}} <i class="fas fa-coins gold-icon mx-1"></i></div>
+                                            <div class="text-label mt-3" style="font:0.99rem;">Winning Potential</div>
+                                            <div class="text-value" style="font:0.99rem;">₦{{challenge_price}} <i class="fas fa-coins gold-icon mx-1"></i></div>
+                                        </div>
                                     </div>
                                 </div>
                         {% endif %}
@@ -345,12 +546,12 @@
             {% else %}
                 {% if game_winner != "Draw" %}
                     {% if game_winner == user.username %}
-                        <h1 class="text-center text text-success my-5">You Win #{{potential_wining}}</h1><br>
+                        <p class="text-center winner-text my-5" style="font:0.99rem;color:rgba(0,255,0,0.5)">You Win ₦{{challenge_price}} <i class="fas fa-coins gold-icon mx-1"></i></p><br>
                         <img src="{% static 'image/WIN_GIF.gif' %}" class="img-fluid rounded-circle my-3" style="width:150px;height:150px"><br>
                         {% csrf_token %}
                         <a class="btn btn-outline-warning auth" style="text-shadow:none" onclick="finishGame()">Finish </a>
                     {% else %}
-                        <h1 class="text-center text text-danger my-5">You Loss </h1>
+                        <h1 class="text-center loss-text my-5" style="font:0.99rem;">You Loss </h1>
                         <img src="{% static 'image/LOSS_GIF.gif' %}" class="img-fluid rounded-circle my-3" style="width:150px;height:150px"><br>
                         {% csrf_token %}
                         <a class="btn btn-outline-warning auth" style="text-shadow:none" onclick="finishGame()">Finish</a>
@@ -373,67 +574,51 @@
                     {% if not required_to_pick %}
                         <div id="not_required_to_pick">
                             {% if to_play == user.username %}
-                                <b class="text text-center text-secondary" style="font-size:20px">Your Turn...</b>
+                                <b class="text text-center text-secondary" style="font:0.99rem;">Your Turn...</b>
                             {% else %}
-                                <b class="text text-center text-secondary" style="font-size:20px">waiting for {{opponent}}...</b>
+                                <b class="text text-center text-secondary" style="font:0.99rem;">waiting for {{opponent}}...</b>
                             {% endif %}
                         </div>
                     {% else %}
                         <div id="required_to_pick">
                             {% if to_play == user.username %}
-                                <b class="text-center text-warning" style="font-size:20px">Your Turn,Please Pick {{no_of_cards_to_pick}}</b>
+                                <b class="text-center text-warning" style="font:0.99rem;">Your Turn,Please Pick {{no_of_cards_to_pick}}</b>
                             {% else %}
-                                <b class="text-center text-warning" style="font-size:20px">waiting for {{opponent}} to pick {{no_of_cards_to_pick}}...</b>
+                                <b class="text-center text-warning" style="font:0.99rem;">waiting for {{opponent}} to pick {{no_of_cards_to_pick}}...</b>
                             {% endif %}
                         </div>
                     {% endif %}
                 {% else %}
                     <div id="hold_on">
                         {% if to_play == user.username %}
-                            <b class="text-center text-warning" style="font-size:20px">Your Turn,Please Continue...</b>
+                            <b class="text-center text-warning" style="font:0.99rem;">Your Turn,Please Continue...</b>
                         {% else %}
-                            <b class="text-center text-warning" style="font-size:20px">Hold On, waiting for '{{opponent}}' to Continue...</b>
+                            <b class="text-center text-warning" style="font:0.99rem;">Hold On, waiting for '{{opponent}}' to Continue...</b>
                         {% endif %}
                     </div>
                 {% endif %}
             {% else %}
                 {% if to_play == user.username %}
-                    <b class="text-center text-danger" style="font-size:20px">Please Click Any Card Or Click General Market</b>
+                    <b class="text-center text-warning" style="font:0.99rem;">General Market Finished Please </b><button class="black-btn" onclick="generalMarket()">click here</button>
                 {% else %}
-                    <b class="text-center text-danger" style="font-size:20px">waiting for {{opponent}}...</b>
+                    <b class="text-center text-warning" style="font:0.99rem;">General Market Finished Please </b><button class="black-btn" onclick="generalMarket()">click here</button>
                 {% endif %}
             {% endif %}
             <br>
             <hr>
-            <b class="text-center text-secondary" style="font-size:20px"><i class="text-warning">Your</i> Remaining Cards <i class="text-warning">'{{number_of_cards}}'</i></b>
+            <b class="text-center text-secondary" style="font:0.99rem;"><i class="text-warning">Your</i> Remaining Cards <i class="text-warning">'{{number_of_cards}}'</i></b>
             <br>
-            {% if player_one == user.username %}
-                {% if player_one_total_amount_of_cards <= 3 %}
-                    <b class="text-center" style="font-size:20px;text-shadow: 7px 1px 2px rgba(34,26,26,0.73);color:rgba(171, 100, 188, 0.8);">Card Amount = <i class="text-success"> "{{player_one_total_amount_of_cards}}"</i></b>
-                {% elif player_one_total_amount_of_cards <= 20 %}
-                    <b class="text-center" style="font-size:20px;text-shadow: 7px 1px 2px rgba(34,26,26,0.73);color:rgba(171, 100, 188, 0.8);">Card Amount = <i class="text-secondary"> "{{player_one_total_amount_of_cards}}"</i></b>
-                {% else %}
-                    <b class="text-center" style="font-size:20px;text-shadow: 7px 1px 2px rgba(34,26,26,0.73);color:rgba(171, 100, 188, 0.8);">Card Amount = <i class="text-danger"> "{{player_one_total_amount_of_cards}}"</i></b>
-                {% endif %}
-            {% else %}
-                {% if player_two_total_amount_of_cards <= 3 %}
-                    <b class="text-center" style="font-size:20px;text-shadow: 7px 1px 2px rgba(34,26,26,0.73);color:rgba(171, 100, 188, 0.8);">Card Amount = <i class="text-success"> "{{player_two_total_amount_of_cards}}"</i></b>
-                {% elif player_two_total_amount_of_cards <= 20 %}
-                    <b class="text-center" style="font-size:20px;text-shadow: 7px 1px 2px rgba(34,26,26,0.73);color:rgba(171, 100, 188, 0.8);">Card Amount = <i class="text-secondary"> "{{player_two_total_amount_of_cards}}"</i></b>
-                {% else %}
-                    <b class="text-center" style="font-size:20px;text-shadow: 7px 1px 2px rgba(34,26,26,0.73);color:rgba(171, 100, 188, 0.8);">Card Amount = <i class="text-danger"> "{{player_two_total_amount_of_cards}}"</i></b>
-                {% endif %}
-            {% endif %}
-            <br>
+
+
             <div class="table-responsive">
-                <table class="table table-dark">
+                <table class="table">
                     {% if player_one == user.username %}
                         {% if can_play %}
                             {% if to_play == user.username %}
                                 {% if player_one == user.username %}
                                     <tr id="player_one_cards_func">
                                         {% for i in player_one_cards reversed %}
-                                            <th style="border:2px solid black" class="table-head">
+                                            <th style="border:2px solid black;cursor:pointer" class="table-head" onclick="submitCard({{i.id}},'{{i.card_shape}}',{{i.card_number}},'player_one')" >
                                                 {% if i.card_image %}
                                                     <button type="submit" class="card-button player-one-cards" title="{{i.card_number}}..{{i.card_shape}}" onclick="submitCard({{i.id}},'{{i.card_shape}}',{{i.card_number}},'player_one')"><img src="{{i.card_image.url}}" style="width:100px;height:100px;border-radius:20px"></button><br><p class="text-secondary" style="font-size:10px">{{i.card_number}}..{{i.card_shape}}</p>
                                                 {% endif %}
@@ -475,7 +660,7 @@
                                 {% if player_two == user.username %}
                                     <tr>
                                         {% for i in player_two_cards reversed %}
-                                        <th id="player_two_cards_func" style="border:2px solid black" class="table-head">
+                                        <th id="player_two_cards_func" style="border:2px solid black;cursor:pointer" class="table-head" onclick="submitCard({{i.id}},'{{i.card_shape}}',{{i.card_number}},'player_one')">
                                             {% if i.card_image %}
                                                 <button class="card-button player-two-cards" title="{{i.card_number}}..{{i.card_shape}}" onclick="submitCard({{i.id}},'{{i.card_shape}}',{{i.card_number}},'player_two')"><img src="{{i.card_image.url}}" style="width:100px;height:100px;border-radius:20px"></button><br><p class="text-secondary" style="font-size:10px">{{i.card_number}}..{{i.card_shape}}</p>
                                             {% endif %}
@@ -518,12 +703,12 @@
                 {% if not player_won %}
                     {% if not has_tie %}
                         {% if is_special %}
-                            <form action="/gttWhott/gttWhot/specialService" method="post" enctype="multipart/form-data" onsubmit="specialMember()">
+                            <form class="mt-5" action="/gttWhott/gttWhot/specialService" method="post" enctype="multipart/form-data" onsubmit="specialMember()">
                             {% csrf_token %}
                             <!--        Special Service For Member-->
                             <div class="row">
                 <!--                General Market-->
-                                <div class="col-md-4 my-1">
+                                <div class="col-md-4">
                                     <label>General Market</label>
                                     <select  class="form-control text-center gtt-four-man-select" name="special_general_market" id="special_general_market" required>
                                         <option value="select-option">Select Card</option>
@@ -573,51 +758,38 @@
             {% endif %}
         {% endif %}
 
-        <div class="m-2">
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <a href="" class="btn btn-outline-warning mb-3  auth">Connections Lag?<br>Refresh</a><br>
-                    <a href="{{opponent_whatsapp_link}}" class="btn btn-outline-primary  auth"><i class="fa fa-whatsapp" aria-hidden="true"></i> Chat '{{opponent}}'</a>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <a class="btn btn-outline-warning  auth"  onclick="opponentDelay()">Report Game Play Delay</a>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <ol style="font-size:20px;text-decoration:underline">
-                        <li class="text-danger text-center">Please Do Not Leave The Game Room.</li>
-                        <li class="text-danger text-center">Make Sure You Have A Good Internet Connection For Better Performance.</li>
-                        <li class="text-danger text-center">Please Do Not Delay Game Play Else Your Account Might Be Banned.</li>
-                    </ol>
-                </div>
-            </div>
-<!--            <h1 class="display-6 text-primary">Stake Amount: #{{challenge_amount}}</h1>-->
-<!--            <h1 class="display-6 text-success">Potential WInning: #{{challenge_price}}</h1>-->
-            <hr style="width:100%">
-            <hr style="width:100%">
-            <h3 class="display-6 text-danger">Power Cards</h3>
-            <ul class="text-center p-2" style="list-style-type:none">
-                <li class="text-warning mb-3"><i class="text-danger">Card 1</i> Hold On</li>
-                <li class="text-warning mb-3"><i class="text-danger">Card 2</i> Pick 2</li>
-                <li class="text-warning mb-3"><i class="text-danger">Card 14</i> General Market</li>
-            </ul>
-        </div>
+        <!-- Tips -->
+      <div class="game-tips my-5">
+        <h5>How to Play</h5>
+        <ul style="list-style-type:none">
+          <li>Match either <strong>number</strong> or <strong>shape</strong> of last played card</li>
+          <li>First player to finish all cards wins</li>
+          <li><strong>1</strong> - Hold On</li>
+          <li><strong>2</strong> - Pick Two</li>
+          <li><strong>5</strong> - Pick Three</li>
+          <li><strong>14</strong> - General Market</li>
+        </ul>
+      </div>
     </div>
   </main>
 
 
-  <!-- Bottom Navbar -->
-  <div class="bottom-navbar bg-warning">
-      <div>
-          <h1 class="text text-primary">{{player_one}}</h1>
-      </div>
-      <div>
-          <p id="gtt">VS</p>
-      </div>
-      <div>
-          <h1 class="text text-primary">{{player_two}}</h1>
-      </div>
+  <!-- Footer: Player vs Opponent -->
+<div class="bottom-nav">
+  <div class="player">
+    <span>{{player_one}}</span>
+    <strong>Player One</strong>
   </div>
-
+  <div class="player">
+    <span>Game Timer</span>
+    <strong>00:<b id="gameTimer">30</b></strong>
+  </div>
+  <div class="player">
+    <span>{{player_two}}</span>
+    <strong>Player Two</strong>
+  </div>
+</div>
+</div>
 
 <!--    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.1/dist/jquery.slim.min.js"></script>-->
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
@@ -633,6 +805,60 @@
             getGameSpinner.style.display = "inline";
 
         }
+
+        function reloadPage(){
+            location.reload()
+
+        }
+
+
+
+
+        <!--  SSE CONNECTION-->
+  const sse = new EventSource("/events/");
+  sse.onmessage = function(event){
+    try{
+      const data = JSON.parse(event.data);
+      if(data.type == "first_n"){
+        console.log(data.username);
+        console.log(data.balance);
+      }else if(data.type == "check_member_whot_game_timer"){
+        const getTimer = document.getElementById("gameTimer");
+        getTimer.textContent = data.game_timer;
+        if(data.game_timer === 0 && data.reload){
+            generalMarket();
+        }
+      }
+      else if(data.type == "check_allow_game_reload"){
+        console.log(data.allow_reload);
+        console.log('data.allow_reload');
+      }
+      else if(data.type == "check_member_game_reload"){
+         console.log("check_member_game_reload");
+         $.ajax({
+            type:"GET",
+            url:"/gttWhott/gttWhot/update/gameReload",
+            success:function(data){
+                console.log("reload called");
+                reloadPage();
+            },
+            error:function(){
+                location.reload(true);
+            }
+         });
+      }
+    }
+    catch(err){
+      console.log("Failed to parse message");
+      location.reload();
+    }
+  };
+
+
+  sse.onerror = function(e){
+    console.log("SSE CONNECTION ERROR",e)
+  };
     </script>
+
 </body>
 </html>

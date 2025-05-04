@@ -42,21 +42,24 @@ class Available_Players(models.Model):
     win_ratio = models.IntegerField(default=0,null=True,blank=True)
     game_link = models.CharField(max_length=1000,null=True,blank=True)
     gender = models.CharField(max_length=100,null=True,blank=True)
-    uploaded_photo = models.BooleanField(default=False,null=True,blank=True)
-    time_available = models.DateTimeField(default=datetime.now, null=True, blank=True)
+    time_available = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     game_type = models.CharField(max_length=1000,null=True,blank=True)
-    whatsapp_link = models.CharField(max_length=10000,null=True,blank=True)
+    chat_link = models.CharField(max_length=10000,null=True,blank=True)
+    allow_player_search = models.BooleanField(default=False,null=True,blank=True)
+    country = models.CharField(default="Nigeria",max_length=10000,null=True,blank=True)
+    format_stake_amount = models.CharField(default=0, max_length=10000, null=True, blank=True)
 
     def __str__(self):
         return str(self.username)
 
 class Transfer_History(models.Model):
     transaction_type = models.CharField(max_length=1000,null=True,blank=True)
+    transaction_topic = models.CharField(max_length=1000,null=True,blank=True)
     sender_name = models.CharField(max_length=1000,null=True,blank=True)
     receiver_name = models.CharField(max_length=1000,null=True,blank=True)
     amount = models.CharField(max_length=1000,null=True,blank=True)
     charges = models.CharField(max_length=1000,null=True,blank=True)
-    transaction_date = models.DateTimeField(default=datetime.now,null=True,blank=True)
+    transaction_date = models.DateTimeField(auto_now_add=True,null=True,blank=True)
     net_balance = models.CharField(default="Out-Dated", max_length=1000, null=True, blank=True)
 
     def __str__(self):
@@ -78,11 +81,87 @@ class Challenges(models.Model):
 class Game_Delay_Report(models.Model):
     reporter = models.CharField(max_length=1000,null=True,blank=True)
     report = models.CharField(max_length=1000,null=True,blank=True)
-    time_reported = models.DateTimeField(default=datetime.now, null=True, blank=True)
+    time_reported = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return str(f"'{self.reporter}' Reported '{self.report}' at '{self.time_reported}' For Game Delay")
 
+
+
+
+
+
+class Notifications(models.Model):
+    notification_type = models.CharField(max_length=1000,null=True,blank=True)
+    notification_message = models.TextField(default=None, null=True, blank=True)
+    notification_time = models.DateTimeField(auto_now_add=True)
+    is_seen = models.BooleanField(default=False,null=True,blank=True)
+
+    def __str__(self):
+        return str(self.notification_type)
+
+
+
+
+class Leaderboard(models.Model):
+    position = models.IntegerField(default=0,null=True,blank=True)
+    username = models.CharField(max_length=1000,null=True,blank=True)
+    game = models.CharField(max_length=1000,null=True,blank=True)
+    amount = models.IntegerField(default=0,null=True,blank=True)
+
+
+    def __str__(self):
+        return str(self.position)
+
+
+
+class Tournaments(models.Model):
+    tournament_title = models.CharField(max_length=1000,null=True,blank=True)
+    tournament_prize = models.IntegerField(default=0,null=True,blank=True)
+    tournament_entry_fee = models.IntegerField(default=0,null=True,blank=True)
+    number_slot = models.IntegerField(default=0,null=True,blank=True)
+    number_slot_taken = models.IntegerField(default=0,null=True,blank=True)
+    tournament_date = models.DateTimeField(auto_now_add=True)
+    tournament_link = models.CharField(max_length=1000,null=True,blank=True)
+
+
+    def __str__(self):
+        return str(self.tournament_title)
+
+
+class All_Messages(models.Model):
+    sender = models.CharField(max_length=1000,null=True,blank=True)
+    receiver = models.CharField(max_length=1000,null=True,blank=True)
+    message = models.TextField(default="Hey,Let's Play Gold...",null=True,blank=True)
+    is_seen = models.BooleanField(default=False,null=True,blank=True)
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Message from {self.sender} to {self.receiver}"
+
+
+class All_Chats(models.Model):
+    chat_one = models.CharField(max_length=1000,null=True,blank=True)
+    chat_two = models.CharField(max_length=1000,null=True,blank=True)
+    messages = models.ManyToManyField(All_Messages,blank=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_message_seen = models.BooleanField(default=False,null=True,blank=True)
+    last_sender = models.CharField(max_length=1000,null=True,blank=True)
+
+    def __str__(self):
+        return f"{self.chat_one}/{self.chat_two}"
+
+
+
+class Withdrawals(models.Model):
+    user = models.CharField(max_length=1000,null=True,blank=True)
+    amount = models.CharField(max_length=1000,null=True,blank=True)
+    status = models.CharField(default="Pending",max_length=1000,null=True,blank=True)
+    date = models.DateTimeField(auto_now_add=True)
+
+
+    def __str__(self):
+        return f"{self.user}...{self.amount}"
 
 
 
@@ -91,8 +170,8 @@ class Members(models.Model):
     initial_password = models.TextField(default=None, null=True, blank=True)
     is_special = models.BooleanField(default=False, null=True, blank=True)
     gender = models.CharField(max_length=1000,null=True,blank=True)
-    balance = models.FloatField(default=200,null=True,blank=True)
-    phone_number = models.CharField(max_length=1000,null=True,blank=True)
+    country = models.TextField(default=None, null=True, blank=True)
+    balance = models.FloatField(default=0,null=True,blank=True)
     number_of_play = models.IntegerField(default=0,null=True,blank=True)
     number_of_draw = models.IntegerField(default=0,null=True,blank=True)
     number_of_win = models.IntegerField(default=0,null=True,blank=True)
@@ -122,14 +201,29 @@ class Members(models.Model):
     current_number_of_whott_cards = models.IntegerField(default=0,null=True,blank=True)
     shuffling_starting_game_on_progress = models.BooleanField(default=False, null=True, blank=True)
     shuffling_check = models.BooleanField(default=False, null=True, blank=True)
+    notifications = models.ManyToManyField(Notifications,blank=True)
+    allow_system_alert = models.BooleanField(default=True, null=True, blank=True)
+    allow_missed_challenge_alert = models.BooleanField(default=True, null=True, blank=True)
+    allow_tournament_alert = models.BooleanField(default=False, null=True, blank=True)
+    allow_bonus_alert = models.BooleanField(default=True, null=True, blank=True)
+    game_invite_privacy = models.BooleanField(default=True,max_length=1000,null=True,blank=True)
+    profile_visibility_privacy = models.BooleanField(default=True,max_length=1000,null=True,blank=True)
+    username_search_visibility_privacy = models.BooleanField(default=True, null=True, blank=True)
+    balance_visibility_privacy = models.BooleanField(default=False, null=True, blank=True)
+    can_transfer = models.BooleanField(default=True, null=True, blank=True)
+    highest_win = models.IntegerField(default=0,null=True,blank=True)
+    highest_loss = models.IntegerField(default=0,null=True,blank=True)
+    my_chats = models.ManyToManyField(All_Chats,blank=True)
+    current_room_id = models.IntegerField(default=0,null=True,blank=True)
+    deposit_in_progress = models.BooleanField(default=False, null=True, blank=True)
+    allow_game_reload = models.BooleanField(default=True, null=True, blank=True)
+    my_withdrawals = models.ManyToManyField(Withdrawals,blank=True)
+
 
     def __str__(self):
         return str(self.user)
 
 
-class All_Phone_Numbers(models.Model):
-    username = models.CharField(max_length=1000,null=True,blank=True)
-    phone_number = models.CharField(max_length=1000, null=True, blank=True)
 
-    def __str__(self):
-        return f"{self.username}...{self.phone_number}"
+
+

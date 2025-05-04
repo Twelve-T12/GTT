@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GTT - Games</title>
+  <link rel="icon" href="{% static 'image/logo.png' %}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+      background-color: #1f1f1f;
+      border-bottom: 1px solid #333;
+    }
+
+    .navbar-brand {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: orange;
+      text-shadow: 2px 2px #000;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .navbar-brand .slogan {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #ffe6b3;
+      text-shadow: 1px 1px #000;
+      animation: fadeInGlow 3s ease-in-out infinite alternate;
+      letter-spacing: 1px;
+    }
+
+    @keyframes fadeInGlow {
+      0% {
+        opacity: 0.4;
+        text-shadow: 0 0 5px orange, 0 0 10px gold, 0 0 15px darkorange;
+      }
+      100% {
+        opacity: 1;
+        text-shadow: 0 0 10px orange, 0 0 20px gold, 0 0 30px orangered;
+      }
+    }
+
+    .navbar-nav .nav-link {
+      color: #fff;
+      margin-right: 10px;
+    }
+
+    .navbar-nav .nav-link:hover {
+      color: orange;
+    }
+
+    .btn-orange {
+      background-color: orange;
+      color: #121212;
+      border: none;
+    }
+
+    .btn-orange:hover {
+      background-color: darkorange;
+    }
+
+    .btn-orange {
+      background-color: orange;
+      color: #121212;
+      border: none;
+    }
+
+    .btn-orange:hover {
+      background-color: darkorange;
+    }
+
+    .animated-dice {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      top: 15%;
+      left: -60px;
+      background-size: cover;
+      background-repeat: no-repeat;
+      animation-name: diceMove;
+      animation-duration: 12s;
+      animation-iteration-count: infinite;
+      opacity: 0.8;
+      z-index: 0;
+    }
+
+    @keyframes diceMove {
+      0% {
+        transform: translateX(0) rotate(0deg);
+        background-image: url('https://upload.wikimedia.org/wikipedia/commons/2/2c/Alea_1.png');
+      }
+      20% { background-image: url('https://upload.wikimedia.org/wikipedia/commons/b/b8/Alea_2.png'); }
+      40% { background-image: url('https://upload.wikimedia.org/wikipedia/commons/2/2f/Alea_3.png'); }
+      60% { background-image: url('https://upload.wikimedia.org/wikipedia/commons/8/8d/Alea_4.png'); }
+      80% { background-image: url('https://upload.wikimedia.org/wikipedia/commons/5/55/Alea_5.png'); }
+      100% {
+        transform: translateX(100vw) rotate(360deg);
+        background-image: url('https://upload.wikimedia.org/wikipedia/commons/f/f4/Alea_6.png');
+      }
+    }
+
+    .game-section {
+      position: relative;
+      z-index: 1;
+      padding: 80px 0;
+    }
+
+    .game-card {
+      background-color: #1f1f1f;
+      border: 1px solid #333;
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .game-card:hover {
+      transform: scale(1.05);
+    }
+
+    .game-card img {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 15px;
+    }
+
+    footer {
+      background-color: #000;
+      padding: 20px 0;
+    }
+
+    footer p {
+      margin: 0;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'index_page' %}">
+      GoldenTwelve
+      <small class="slogan text-center">Let's play gold...</small>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="{% url 'games_page' %}">Games</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'how_it_works_page' %}">How It Works</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'terms_conditions_page' %}">Terms & Conditions</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'privacy_page' %}">Privacy</a></li>
+        {% if not user.is_authenticated %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'login_page' %}">Login</a></li>
+          <li class="nav-item"><a class="btn btn-orange ms-2" href="{% url 'register_page' %}">Join Now</a></li>
+        {% else %}
+          <li class="nav-item"><a class="btn btn-orange ms-2" href="{% url 'home_page' %}">My Dashboard</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Dice Animations -->
+<div class="animated-dice" style="top: 10%; left: -60px; animation-delay: 0s;"></div>
+<div class="animated-dice" style="top: 30%; left: -60px; animation-delay: 2s;"></div>
+<div class="animated-dice" style="top: 50%; left: -60px; animation-delay: 4s;"></div>
+
+<!-- Game Section -->
+<section class="game-section">
+  <div class="container">
+    <h2 class="text-center mb-5">Explore Our Games</h2>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="game-card">
+          <img src="{% static '/image/14_PLUS.JPG' %}" alt="Whot">
+          <h4>Whot Card Game</h4>
+          <p>Challenge friends and win instant rewards!</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="game-card">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Alea_6.png" alt="Dice Game">
+          <h4>Dice Game</h4>
+          <p>Roll to win. Fun and pure luck!</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="game-card">
+          <img src="https://cdn-icons-png.flaticon.com/512/899/899650.png" alt="More Games">
+          <h4>More Coming Soon</h4>
+          <p>We're adding more fun traditional games!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="text-center text-white">
+  <div class="container">
+    <p>&copy; 2025 GoldenTwelve. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

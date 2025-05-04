@@ -168,22 +168,7 @@ class Check_Start_Game(View):
             return redirect("login_page")
 
 
-class Continue_Game(View):
-    def get(self,request):
-        if request.user.is_authenticated:
-            user_id = request.user.id
-            username = request.user.username
-            get_member = Members.objects.get(id=user_id)
-            if get_member.game_started:
-                if get_member.current_game_type == "Golden Number":
-                    member_opponent = get_member.current_opponent
-                    return redirect(f"/game/gameRoom/{username}/vs/{member_opponent}")
-                elif get_member.current_game_type == "Golden Whot":
-                    return redirect(f"/gttWhott/gttWhot/gameRoom")
-            else:
-                return redirect("home_page")
-        else:
-            return redirect("home_page")
+
 
 
 class Game_Room(View):

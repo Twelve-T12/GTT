@@ -1,12 +1,11 @@
 from django.urls import path
-from game.views import Game,Start_Game,Check_Start_Game,Continue_Game,Game_Room,Sender_Numbers_Collation,First_Number,Second_Number,Third_Number,Fourth_Number,Fifth_Number,Sixth_Number,Next_Round,Check_Game_Reload,Update_Game_Reload,Finish_Round,End_Game,Opponent_Delay_Report
+from game.views import Game,Start_Game,Check_Start_Game,Game_Room,Sender_Numbers_Collation,First_Number,Second_Number,Third_Number,Fourth_Number,Fifth_Number,Sixth_Number,Next_Round,Check_Game_Reload,Update_Game_Reload,Finish_Round,End_Game,Opponent_Delay_Report
 
 
 urlpatterns = [
     path("game",Game.as_view(),name="game_page"),
     path("start/game/<str:amount>",Start_Game.as_view(),name="start_game_page"),
     path("check/game",Check_Start_Game.as_view(),name="check_start_game_page"),
-    path("continue/game",Continue_Game.as_view(),name="continue_game_page"),
     path("gameRoom/<str:user>/vs/<str:opponent>",Game_Room.as_view(),name="game_room_page"),
     path("senderNumbersCollation",Sender_Numbers_Collation.as_view(),name="game_number_page"),
     path("receiverFirstNumber",First_Number.as_view(),name="receiver_first_number_page"),

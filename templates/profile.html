@@ -2,265 +2,489 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{username}}'s Profile</title>
-    <link rel="icon" href="{% static 'image/logo.png' %}">
-<!--    <link rel="stylesheet" href="{% static 'css/style.css' %}">-->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
-     <style>
-        body{
-            background-image:url("/static/image/bg_img_six.jpg");
-            background-repeat: no-repeat;
-            background-position:center;
-            background-attachment:fixed;
-            background-size:cover;
-            animation-name:backgrounds;
-            animation-iteration-count:infinite;
-            animation-duration:10s;
-        }
-        @keyframes background{
-            0%{
-                background-image:url("static/image/bg_img_two.jpg");
-            }
-            30%{
-                background-image:url("static/image/bg_img_three.jpg");
-            }
-            50%{
-                background-image:url("static/image/bg_img_four.jpg");
-            }
-            70%{
-                background-image:url("static/image/bg_img_five.jpeg");
-            }
-            100%{
-                background-image:url("static/image/bg_img_one.jpg");
-            }
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GoldenTwelve - Profile</title>
+  <link rel="icon" href="{% static 'image/logo.png' %}">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      padding-top: 80px;
+      padding-bottom: 80px;
+      background-image: radial-gradient(circle, rgba(255,140,0,0.05) 1px, transparent 1px);
+      background-size: 30px 30px;
+      animation: moveBackground 20s linear infinite;
+    }
+
+    @keyframes moveBackground {
+      0% { background-position: 0 0; }
+      100% { background-position: 100px 100px; }
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: #1f1f1f;
+      border-bottom: 1px solid #333;
+      z-index: 1000;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar-brand {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: orange;
+      text-shadow: 2px 2px #000;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .navbar-brand .slogan {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #ffe6b3;
+      text-shadow: 1px 1px #000;
+      animation: fadeInGlow 3s ease-in-out infinite alternate;
+      letter-spacing: 1px;
+    }
+
+    @keyframes fadeInGlow {
+      0% {
+        opacity: 0.4;
+        text-shadow: 0 0 5px orange, 0 0 10px gold, 0 0 15px darkorange;
+      }
+      100% {
+        opacity: 1;
+        text-shadow: 0 0 10px orange, 0 0 20px gold, 0 0 30px orangered;
+      }
+    }
+
+    .balance-box {
+      background-color: #2c2c2c;
+      color: #fff;
+      font-weight: bold;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .gold-icon {
+      animation: spin 3s linear infinite;
+      font-size: 1rem;
+      color: gold;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .add-money-icon {
+      background-color: orange;
+      border: none;
+      color: #121212;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: 0.3s;
+    }
 
 
-        .text{
-                text-transform: uppercase;
-                font-family: verdana;
-                font-size: 30px;
-                font-weight: 700;
-                color: #f5f5f5;
-                text-shadow: 1px 1px 1px #919191,
-                    1px 2px 1px #919191,
-                    1px 3px 1px #919191,
-                    1px 4px 1px #919191,
-                    1px 5px 1px #919191,
-                    1px 6px 1px #919191,
-                    1px 7px 1px #919191,
-                    1px 8px 1px #919191,
-                    1px 9px 1px #919191,
-                    1px 10px 1px #919191,
-                1px 18px 6px rgba(16,16,16,0.4),
-                1px 22px 10px rgba(16,16,16,0.2),
-                1px 25px 35px rgba(16,16,16,0.2),
-                1px 30px 60px rgba(16,16,16,0.4);
-            }
 
-        .top-navbar-text{
-                text-transform: uppercase;
-                font-family: verdana;
-                font-size: 15px;
-                font-weight: 700;
-                color: #f5f5f5;
-                text-shadow: 1px 1px 1px #919191,
-                    1px 2px 1px #919191,
-                    1px 3px 1px #919191,
-                    1px 4px 1px #919191,
-                    1px 5px 1px #919191,
-                    1px 6px 1px #919191,
-                    1px 7px 1px #919191,
-                    1px 8px 1px #919191,
-                    1px 9px 1px #919191,
-                    1px 10px 1px #919191,
-                1px 18px 6px rgba(16,16,16,0.4),
-                1px 22px 10px rgba(16,16,16,0.2),
-                1px 25px 35px rgba(16,16,16,0.2),
-                1px 30px 60px rgba(16,16,16,0.4);
-            }
+    .balance-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-        #top{
-            color: gold;
-            font-size: 15px;
-            text-align: center;
-            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-            text-shadow: 1px 2px 1px  rgba(0,0,0,.5);
-            }
-        #top:hover{
-            color:#ffca18;
-            text-shadow: 2px 2px 20px  #2c90c6, #fff 0 -1px 2px;
-            }
+    .btn-orange {
+      background: linear-gradient(to right, orange, orangered);
+      border: none;
+      color: #121212;
+      font-weight: bold;
+      border-radius: 8px;
+    }
 
+    .btn-orange:hover {
+      background: linear-gradient(to right, darkorange, orange);
+    }
 
-        .top-navbar{
-            width:100%;
-            position: fixed;
-            top:0;
-            display: flex;
-            justify-content: space-between;
-            z-index:1;
-        }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #1f1f1f;
+      border-top: 1px solid #333;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      z-index: 999;
+    }
 
-        .bottom-navbar{
-            width:100%;
-            position: fixed;
-            bottom:0;
-            display: flex;
-            justify-content: space-between;
-        }
+    .bottom-nav a {
+      text-align: center;
+      flex: 1;
+    }
 
-        .auth{
-            background-color: #2c90c6;
-            border: 1px solid #2c90c6;
-            border-radius: 15px;
-            -moz-border-radius: 15px;
-            -webkit-border-radius: 15px;
-            -ms-border-radius: 15px;
-            -o-border-radius: 15px;
-            color: #fff;
-            font-weight: bold;
-            line-height: 20px;
-            text-align: center;
-            text-transform: uppercase;
-            width: auto;
-        }
-        #auth:hover{
-            background-color: #2c70c6;
-            box-shadow: 2px 2px 20px  #2c90c6, #fff 0 -1px 2px;
-        }
-    </style>
+    .bottom-nav i {
+      color: orange;
+      font-size: 1.4rem;
+    }
+
+    .bottom-nav .fa-user {
+      font-size: 1.8rem;
+      animation: bounce 1.5s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-4px);
+      }
+    }
+
+    /* Glass Card with Animation */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(6px);
+      border-radius: 16px;
+      box-shadow: 0 0 12px rgba(255, 140, 0, 0.15);
+      transition: transform 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
+    }
+
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: scale(1.04) translateY(-4px) rotateX(2deg);
+      box-shadow: 0 0 20px rgba(255, 140, 0, 0.4);
+    }
+
+    .form-control {
+      background-color: #2c2c2c;
+      border: 1px solid #444;
+      color: #fff;
+    }
+
+    .form-control::placeholder {
+      color: #aaa;
+    }
+
+    @media (max-width: 576px) {
+      .navbar h1 {
+        font-size: 1.3rem;
+      }
+      .balance-box {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+      }
+      .add-money-icon {
+        padding: 4px 8px;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Bell ring animation */
+    .fa-bell.ringing {
+      animation: bellRing 1.5s ease-in-out infinite;
+      transform-origin: top center;
+    }
+
+    @keyframes bellRing {
+      0% { transform: rotate(0deg); }
+      10% { transform: rotate(-15deg); }
+      20% { transform: rotate(15deg); }
+      30% { transform: rotate(-12deg); }
+      40% { transform: rotate(12deg); }
+      50% { transform: rotate(-8deg); }
+      60% { transform: rotate(8deg); }
+      70% { transform: rotate(-4deg); }
+      80% { transform: rotate(4deg); }
+      90% { transform: rotate(-2deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    /* Chat message bounce animation */
+    .fa-comment.message-alert {
+      animation: messageBounce 1.2s infinite;
+      transform-origin: center;
+    }
+
+    @keyframes messageBounce {
+      0%, 100% { transform: translateY(0); }
+      25% { transform: translateY(-4px); }
+      50% { transform: translateY(2px); }
+      75% { transform: translateY(-2px); }
+    }
+  </style>
 </head>
+<body>
+{% csrf_token %}
 
-
-<body >
-
-
-
-
- <!-- Top Navbar -->
-  <div class="top-navbar bg-secondary">
-
-      {% if user.is_superuser %}
-          <p class="top-navbar-text text-warning">Hi,<a href="/admin/Shokunbi-Olalekan-Babatunde-T12welve/"><i class="auth">{{username}}</i></a></p>
-
-      {% else %}
-           <p class="top-navbar-text text-warning">Hi,<a href="/profile/{{username}}" ><i class="auth">{{username}}</i></a><br></p>
-      {% endif %}
-
-       <div>
-            <img src="{% static 'image/gtt_whot_logo.png' %}" class="align-items-center" style="width:50px;height:50px;border-radius:20px;"><br>
-<!--            <h1 id="top">GoldenTwelveTransaction<br><b style="font-size:10px">let's play whot...</b></h1>-->
-       </div>
-
-
-      <p class="top-navbar-text text-warning">Balance:<i class="auth">#{{balance}}</i></p>
-  </div>
-  <!-- End of Top Navbar -->
-
-
-  <main class="my-5 text-center text-white">
-    {% csrf_token %}
-    {% for i in messages %}
-            <p class="text-center top-navbar-text text-white" style="font-size:15px;margin-top:150px;text-shadow:none">"{{i}}"</p>
-      {% endfor %}
-
-      {% if gender == "Male" %}
-          <img src="{% static 'image/man.png' %}" class="img-fluid rounded-circle my-3" style="width:100px;height:100px">
-      {% elif gender == "Female" %}
-          <img src="{% static 'image/woman.png' %}" class="img-fluid rounded-circle my-3" style="width:100px;height:100px">
-      {% endif %}
-
-
-    <div class="row text-center my-5" id="profile">
-      <div class="col-md-12 mb-3">
-        <h1 class="text text-warning">Username</h1>
-        <h3 class="top-navbar-text">{{username}} </h3>
-      </div>
-      <div class="col-md-4 mb-3">
-        <h1 class="text text-warning">First Name</h1>
-        <h3 class="top-navbar-text">{{first_name}} </h3>
-      </div>
-      <div class="col-md-4 mb-3">
-        <h1 class="text text-warning">Last Name</h1>
-        <h3 class="top-navbar-text">{{last_name}} </h3>
-      </div>
-      <div class="col-md-4 mb-3">
-        <h1 class="text text-warning">Sex</h1>
-        <h3 class="top-navbar-text">{{gender}} </h3>
-      </div>
-      <div class="col-md-4 mb-3">
-        <h1 class="text text-warning">Email</h1>
-        <h3 class="top-navbar-text">{{email}} </h3>
-      </div>
-      <div class="col-md-4 mb-3">
-        <h1 class="text text-warning">Total Played</h1>
-        <h3 class="top-navbar-text">{{total_play}} </h3>
-      </div>
-      <div class="col-md-4 mb-3">
-        <h1 class="text text-warning">Win Ratio</h1>
-        <h3 class="top-navbar-text">{{win_ratio}}% </h3>
-      </div>
-<!--      <div class="col-md-4 mb-3">-->
-<!--        <h1 class="text">Total Draws</h1>-->
-<!--        <h3 class="text-secondary">{{total_draw}} </h3>-->
-<!--      </div>-->
-<!--      <div class="col-md-4 mb-3">-->
-<!--        <h1 class="text">Total Wins</h1>-->
-<!--        <h3 class="text-success">{{total_win}} </h3>-->
-<!--      </div>-->
-<!--      <div class="col-md-4 mb-3">-->
-<!--        <h1 class="text">Total Loss</h1>-->
-<!--        <h3 class="text-danger">{{total_loss}} </h3>-->
-<!--      </div>-->
-      <div class="col-md-12 mb-3">
-          <h1 class="text text-warning">Phone Number</h1>
-          <h3 class="top-navbar-text">{{phone_number}} </h3>
-        </div>
-
-
-      {% if total_reports <= 10 %}
-        <div class="col-md-12 mb-3">
-          <h1 class="text-warning">Number Of Game Delay Reports</h1>
-          <h3 class="text">{{format_total_reports}} </h3>
-          <h1 style="font-size:20px;color:red">Please Do Not Delay Players While Playing Games Or You Will Be Banned.</h1>
-        </div>
-      {% elif total_reports <= 100 %}
-        <div class="col-md-12 mb-3">
-          <h1 class=" text-warning">Number Of Game Delay Reports</h1>
-          <h3 class="text-danger">{{format_total_reports}} </h3>
-          <h1 style="font-size:20px;color:red">Your Account Will Be Banned If You Keep Getting Delay Reports.</h1>
-        </div>
-      {% else %}
-        <div class="col-md-12 mb-3">
-          <h1 class="text text-warning">Number Of Game Delay Reports</h1>
-          <h3 class="text-danger">{{format_total_reports}} </h3>
-          <h1 class="text">Your Account Will Be Fined During Withdrawal. </h1>
-        </div>
-      {% endif %}
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="navbar-brand">
+      GoldenTwelve
+      <small class="slogan text-center">Let's play gold...</small>
     </div>
-  </main>
-
-  
-
-  <!-- Bottom Navbar -->
-    <div class="bottom-navbar">
-      <a href="{% url 'home_page' %}"  class="btn btn-dark"><i class="fa fa-home display-6" aria-hidden="true" title="home"></i><br><b>Home</b></a>
-      <a href="/profile/{{username}}" class="btn btn-dark active"><i class="fa fa-user display-6" aria-hidden="true"></i><br><b>Profile</b></a>
-      <a href="/{{username}}/settings" class="btn btn-dark"><i class="fa fa-cog display-6" aria-hidden="true"></i><br><b>Settings</b></a>
-      <a href="{% url 'logout_page' %}" class="btn btn-dark"><i class="fa fa-sign-out display-6" aria-hidden="true"></i><br><b>Logout</b></a>
+    <div class="balance-section">
+      <div class="balance-box">
+        <i class="fas fa-coins gold-icon"></i> {{balance}}
+      </div>
+      <button class="add-money-icon" data-bs-toggle="modal" data-bs-target="#depositModal" title="Add Money">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
   </div>
-    <!-- End of Bottom Navbar -->
+
+    <!-- Deposit Modal -->
+  <div class="modal fade" id="depositModal" tabindex="-1" aria-labelledby="depositModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-dark">
+        <div class="modal-header">
+          <h5 class="modal-title" id="depositModalLabel">
+            <i class="fas fa-coins gold-icon me-1"></i> Add Gold
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Your deposit form or content goes here -->
+          <p>Proceed to select your preferred deposit amount and payment method to fund your wallet.</p>
+          <a href="{% url 'make_deposit_page' %}" class="btn btn-orange w-100">Proceed</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Section -->
+  <div class="container mt-3">
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-4">
+        <div class="glass-card text-center p-3">
+          <h6 class="text-warning">Games Played</h6>
+          <p class="fs-4 fw-bold text-white">{{total_play}}</p>
+        </div>
+      </div>
+      <div class="col-6 col-md-4">
+        <div class="glass-card text-center p-3">
+          <h6 class="text-warning">Win Ratio</h6>
+          <p class="fs-4 fw-bold text-white">{{win_ratio}}%</p>
+        </div>
+      </div>
+      <div class="col-6 col-md-4">
+        <div class="glass-card text-center p-3">
+          <h6 class="text-warning">Wins</h6>
+          <p class="fs-4 fw-bold text-white">{{total_win}}</p>
+        </div>
+      </div>
+      <div class="col-6 col-md-4">
+        <div class="glass-card text-center p-3">
+          <h6 class="text-warning">Loss</h6>
+          <p class="fs-4 fw-bold text-white">{{total_loss}}</p>
+        </div>
+      </div>
+      <div class="col-6 col-md-4">
+        <div class="glass-card text-center p-3">
+          <h6 class="text-warning">Highest Win</h6>
+          <p class="fs-4 fw-bold text-white"><i class="fas fa-coins gold-icon mx-2"></i>{{highest_win}}</p>
+        </div>
+      </div>
+      <div class="col-6 col-md-4">
+        <div class="glass-card text-center p-3">
+          <h6 class="text-warning">Highest Loss</h6>
+          <p class="fs-4 fw-bold text-white"><i class="fas fa-coins gold-icon mx-2"></i>{{highest_loss}}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Info -->
+    <div class="glass-card p-4 mb-4">
+      <h5 class="text-warning mb-3">My Details</h5>
+      <p><strong class="text-light">Username:</strong> @{{username}}</p>
+      <p><strong class="text-light">Email:</strong> {{email}}</p>
+      <p><strong class="text-light">Gender:</strong> {{gender}}</p>
+      <p><strong class="text-light">Country:</strong> {{country}}</p>
+    </div>
+
+    <!-- Update Profile -->
+    <div class="glass-card p-4 mb-4">
+      <h5 class="text-warning mb-3">Update Profile</h5>
+      <form>
+        <div class="mb-3">
+          <input type="email" class="form-control" placeholder="New Email" />
+        </div>
+        <button type="submit" class="btn btn-orange w-100">Update Email</button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- Car Game Modal -- Show All Challenge Modal -->
+  <div class="modal fade" id="showGameModal" tabindex="-1" aria-labelledby="carGameModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-white animate__animated animate__fadeInDown rounded-4 p-3" style="border: 1px solid orange;">
+        <div class="modal-header border-0">
+          <h5 class="modal-title text-warning" id="carGameModalLabel">
+            <i class="fas fa-gamepad me-2 text-orange"></i>Game Invite
+          </h5>
+        </div>
+        <div class="modal-body text-center">
+          <p class="fs-5"><span class="text-warning fw-bold" id="show_challenger_username_modal">@lekan</span> wants to challenge you to a <span class="text-warning fw-bold" id="show_challenge_game_type_modal">Whot</span> game, with a stake of <span class="text-warning fw-bold" id="show_challenge_amount_modal">1,000 </span><i class="fas fa-coins gold-icon mx-2"></i>. Do you want to play?</p>
+          <div class="d-flex justify-content-center gap-3 mt-4">
+            <button class="btn btn-orange px-4 py-2 shadow" id="accept_challenge_button">
+              <i class="fas fa-gamepad me-1"></i> Accept
+            </button>
+            <button class="btn btn-secondary px-4 py-2 shadow" data-bs-dismiss="modal" id="decline_challenge_button">
+              <i class="fas fa-times me-1"></i> Decline
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="bottom-nav">
+    <a href="{% url 'notification_alerts_page' %}"><i class="fas fa-bell" id="ringing"></i></a>
+    <a href="{% url 'chat_page' %}"><i class="fas fa-comment" id="chatting"></i></a>
+    <a href="{% url 'home_page' %}"><i class="fas fa-home"></i></a>
+    <a href="/profile/{{username}}"><i class="fas fa-user"></i></a>
+    <a href="/{{username}}/settings"><i class="fas fa-cog"></i></a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+  function showChallenges(challenger,challenge_game,challenge_amount,challenge_id){
+  console.log("Called",challenger);
+  const showGameModal = new bootstrap.Modal(document.getElementById("showGameModal"));
+  var getModalChallengerUsername = document.getElementById("show_challenger_username_modal");
+  var getModalChallengeGameType = document.getElementById("show_challenge_game_type_modal");
+  var getModalChallengeAmount = document.getElementById("show_challenge_amount_modal");
+  var getModalAcceptBtn = document.getElementById("accept_challenge_button");
+  var getModalDeclineBtn = document.getElementById("decline_challenge_button");
 
 
-<!--    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.1/dist/jquery.slim.min.js"></script>-->
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'js/index.js' %}"></script>
+  getModalAcceptBtn.setAttribute('onclick',`acceptChallenge('${challenge_id}')`);
+  getModalDeclineBtn.setAttribute('onclick',`declineChallenge('${challenge_id}')`);
+  getModalChallengerUsername.innerText = `@${challenger}`;
+  getModalChallengeGameType.innerText = `${challenge_game}`;
+  getModalChallengeAmount.innerText = `${challenge_amount}`;
+  showGameModal.show();
+}
+
+
+  function acceptChallenge(id){
+        $.ajax({
+            type:"POST",
+            url:"/accept/challenge",
+            data:{
+                csrfmiddlewaretoken:$("input[name=csrfmiddlewaretoken]").val(),
+                challenge_id:id
+            },
+            success:function(){
+                location.reload()
+            },
+            error:function(){
+                location.reload()
+            }
+        })
+}
+
+
+
+
+function declineChallenge(id){
+        $.ajax({
+            type:"POST",
+            url:"/decline/challenge",
+            data:{
+                csrfmiddlewaretoken:$("input[name=csrfmiddlewaretoken]").val(),
+                challenge_id:id
+            },
+            success:function(){
+                location.reload()
+            },
+            error:function(){
+                location.reload()
+            }
+        })
+}
+
+  function newChatNotification(seen,last_sender){
+    if('{{username}}' !== last_sender){
+        if(seen){
+            console.log("remove from chat");
+            var getChatAlert = document.getElementById("chatting");
+            getChatAlert.classList.remove("message-alert");
+        }else{
+            console.log(`add to chat`);
+            var getChatAlert = document.getElementById("chatting");
+            getChatAlert.classList.add("message-alert");
+        }
+    }
+  };
+
+    <!--  SSE CONNECTION-->
+  const sse = new EventSource("/events/");
+  sse.onmessage = function(event){
+    try{
+      const data = JSON.parse(event.data);
+      if(data.type == "first_n"){
+        console.log(data.username);
+        console.log(data.balance);
+      }else if( data.type == "check_member_has_game" ){
+          window.location = "/checkGame";
+      }
+      else if( data.type == "member_challenges" ){
+        data.data.forEach(e  => {
+          showChallenges(e.challenger,e.challenge_game_type,e.amount,e.id);
+        })
+      }
+      else if( data.type == "chats" ){
+        data.chats.forEach(e  => {
+          console.log(e.date_created);
+          newChatNotification(e.last_message_seen,e.last_sender);
+      })
+      }
+      else if( data.type == "notification"){
+        var getNotificationIcon = document.getElementById("ringing");
+        getNotificationIcon.classList.add("ringing");
+      }
+      else if( data.type == "second_n"){
+        data.data.forEach(e => {
+          console.log(e.balance)
+        })
+      }
+    }
+    catch(err){
+      console.log("Failed to parse message");
+      location.reload();
+    }
+  };
+
+
+  sse.onerror = function(e){
+    console.log("SSE CONNECTION ERROR",e)
+  };
+  </script>
 </body>
 </html>

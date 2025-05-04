@@ -1,0 +1,659 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GoldenTwelve - Leaderboard</title>
+  <link rel="icon" href="{% static 'image/logo.png' %}">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      padding-top: 70px;
+      padding-bottom: 80px;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: #1f1f1f;
+      border-bottom: 1px solid #333;
+      z-index: 1000;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar-brand {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: orange;
+      text-shadow: 2px 2px #000;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .navbar-brand .slogan {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #ffe6b3;
+      text-shadow: 1px 1px #000;
+      animation: fadeInGlow 3s ease-in-out infinite alternate;
+      letter-spacing: 1px;
+    }
+
+    @keyframes fadeInGlow {
+      0% {
+        opacity: 0.4;
+        text-shadow: 0 0 5px orange, 0 0 10px gold, 0 0 15px darkorange;
+      }
+      100% {
+        opacity: 1;
+        text-shadow: 0 0 10px orange, 0 0 20px gold, 0 0 30px orangered;
+      }
+    }
+
+    .balance-box {
+      background-color: #2c2c2c;
+      color: #fff;
+      font-weight: bold;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .gold-icon {
+      animation: spin 3s linear infinite;
+      font-size: 1rem;
+      color: gold;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .add-money-icon {
+      background-color: orange;
+      border: none;
+      color: #121212;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: 0.3s;
+    }
+
+
+    .balance-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-orange {
+      background: linear-gradient(to right, orange, orangered);
+      border: none;
+      color: #121212;
+      font-weight: bold;
+      border-radius: 8px;
+    }
+
+    .btn-orange:hover {
+      background: linear-gradient(to right, darkorange, orange);
+    }
+
+    .leaderboard {
+      padding: 20px;
+    }
+
+    .leader-card {
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .leader-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .leader-rank {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: orange;
+      width: 35px;
+      text-align: center;
+    }
+
+    .leader-icon {
+      font-size: 1.2rem;
+      margin-right: 5px;
+      color: gold;
+    }
+
+    .leader-name {
+      font-size: 1rem;
+      font-weight: bold;
+    }
+
+    .leader-title {
+      font-size: 0.85rem;
+      color: #aaa;
+    }
+
+    .leader-amount {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: gold;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #1f1f1f;
+      border-top: 1px solid #333;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      z-index: 999;
+    }
+
+    .bottom-nav a {
+      text-align: center;
+      flex: 1;
+    }
+
+    .bottom-nav i {
+      color: orange;
+      font-size: 1.4rem;
+    }
+
+    .bottom-nav .bell-icon {
+      font-size: 1.8rem;
+      animation: bounce 1.5s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-4px);
+      }
+    }
+
+    @media (max-width: 576px) {
+      .navbar h1 {
+        font-size: 1.2rem;
+      }
+      .balance-box {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+      }
+      .add-money-icon {
+        padding: 4px 8px;
+        font-size: 0.9rem;
+      }
+    }
+
+    .empty-state {
+      text-align: center;
+      margin-top: 100px;
+      padding: 40px 20px;
+    }
+
+    .empty-icon {
+      font-size: 4.5rem;
+      color: gold;
+      animation: bounce 2s infinite alternate;
+    }
+
+    .empty-message {
+      font-size: 1.6rem;
+      margin-top: 20px;
+      font-weight: bold;
+      color: orange;
+    }
+
+    .subtext {
+      font-size: 1rem;
+      color: #ccc;
+      margin-top: 10px;
+    }
+
+    .btn-view {
+      margin-top: 30px;
+      background: linear-gradient(to right, orange, orangered);
+      border: none;
+      color: #121212;
+      font-weight: bold;
+      border-radius: 8px;
+      padding: 10px 20px;
+    }
+
+    .btn-view:hover {
+      background: linear-gradient(to right, darkorange, orange);
+    }
+
+    @media (max-width: 576px) {
+
+      .empty-icon {
+        font-size: 3rem;
+      }
+
+      .empty-message {
+        font-size: 1.3rem;
+      }
+    }
+
+    /* Bell ring animation */
+    .fa-bell.ringing {
+      animation: bellRing 1.5s ease-in-out infinite;
+      transform-origin: top center;
+    }
+
+    @keyframes bellRing {
+      0% { transform: rotate(0deg); }
+      10% { transform: rotate(-15deg); }
+      20% { transform: rotate(15deg); }
+      30% { transform: rotate(-12deg); }
+      40% { transform: rotate(12deg); }
+      50% { transform: rotate(-8deg); }
+      60% { transform: rotate(8deg); }
+      70% { transform: rotate(-4deg); }
+      80% { transform: rotate(4deg); }
+      90% { transform: rotate(-2deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+
+    /* Chat message bounce animation */
+    .fa-comment.message-alert {
+      animation: messageBounce 1.2s infinite;
+      transform-origin: center;
+    }
+
+    @keyframes messageBounce {
+      0%, 100% { transform: translateY(0); }
+      25% { transform: translateY(-4px); }
+      50% { transform: translateY(2px); }
+      75% { transform: translateY(-2px); }
+    }
+  </style>
+</head>
+<body>
+{% csrf_token %}
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="navbar-brand">
+      GoldenTwelve
+      <small class="slogan text-center">Let's play gold...</small>
+    </div>
+    <div class="balance-section">
+      <div class="balance-box">
+        <i class="fas fa-coins gold-icon"></i> {{balance}}
+      </div>
+      <button class="add-money-icon" data-bs-toggle="modal" data-bs-target="#depositModal" title="Add Money">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+  </div>
+
+    <!-- Deposit Modal -->
+  <div class="modal fade" id="depositModal" tabindex="-1" aria-labelledby="depositModalLabel" >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-dark">
+        <div class="modal-header">
+          <h5 class="modal-title" id="depositModalLabel">
+            <i class="fas fa-coins gold-icon me-1"></i> Add Gold
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Your deposit form or content goes here -->
+          <p>Proceed to select your preferred deposit amount and payment method to fund your wallet.</p>
+          <a href="{% url 'make_deposit_page' %}" class="btn btn-orange w-100">Proceed</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if leaderboard %}
+    <!-- Leaderboard -->
+    <div class="leaderboard container">
+    <h4 class="mb-4 text-warning">Top Players</h4>
+      {% for i in leaderboard %}
+        {% if i.position == 1 %}
+
+
+            <div class="leader-card">
+              <div class="leader-info">
+                <div class="leader-rank">1</div>
+                <div>
+                  <div class="leader-name"><i class="fas fa-crown leader-icon"></i>@{{i.username}}</div>
+                  <div class="leader-title">{{i.game}}</div>
+                </div>
+              </div>
+              <div class="leader-amount"><i class="fas fa-coins gold-icon"></i>{{i.amount}}</div>
+            </div>
+
+        {% elif i.position == 2 %}
+
+            <div class="leader-card">
+              <div class="leader-info">
+                <div class="leader-rank">2</div>
+                <div>
+                  <div class="leader-name"><i class="fas fa-medal leader-icon"></i>@{{i.username}}</div>
+                  <div class="leader-title">{{i.game}}</div>
+                </div>
+              </div>
+              <div class="leader-amount"><i class="fas fa-coins gold-icon"></i>{{i.amount}}</div>
+            </div>
+
+        {% elif i.position == 3 %}
+
+
+            <div class="leader-card">
+              <div class="leader-info">
+                <div class="leader-rank">3</div>
+                <div>
+                  <div class="leader-name"><i class="fas fa-award leader-icon"></i>@{{i.username}}</div>
+                  <div class="leader-title">{{i.game}}</div>
+                </div>
+              </div>
+              <div class="leader-amount"><i class="fas fa-coins gold-icon"></i>{{i.amount}}</div>
+            </div>
+
+        {% elif i.position == 4 %}
+
+          <div class="leader-card">
+            <div class="leader-info">
+              <div class="leader-rank">4</div>
+              <div>
+                <div class="leader-name">{{i.username}}</div>
+                <div class="leader-title">{{i.game}}</div>
+              </div>
+            </div>
+            <div class="leader-amount"><i class="fas fa-coins gold-icon"></i>{{i.amount}}</div>
+          </div>
+
+        {% elif i.position == 5 %}
+
+          <div class="leader-card">
+            <div class="leader-info">
+              <div class="leader-rank">5</div>
+              <div>
+                <div class="leader-name">{{i.username}}</div>
+                <div class="leader-title">{{i.game}}</div>
+              </div>
+            </div>
+            <div class="leader-amount"><i class="fas fa-coins gold-icon"></i>{{i.amount}}</div>
+          </div>
+
+        {% elif i.position == 6 %}
+
+          <div class="leader-card">
+            <div class="leader-info">
+              <div class="leader-rank">6</div>
+              <div>
+                <div class="leader-name">{{i.username}}</div>
+                <div class="leader-title">{{i.game}}</div>
+              </div>
+            </div>
+            <div class="leader-amount"><i class="fas fa-coins gold-icon"></i>{{i.amount}}</div>
+          </div>
+
+
+        {% elif i.position == 7 %}
+
+          <div class="leader-card">
+            <div class="leader-info">
+              <div class="leader-rank">4</div>
+              <div>
+                <div class="leader-name">{{i.username}}</div>
+                <div class="leader-title">{{i.game}}</div>
+              </div>
+            </div>
+            <div class="leader-amount"><i class="fas fa-coins gold-icon"></i>{{i.amount}}</div>
+          </div>
+
+        {% elif i.position == 8 %}
+
+          <div class="leader-card">
+            <div class="leader-info">
+              <div class="leader-rank">8</div>
+              <div>
+                <div class="leader-name">{{i.username}}</div>
+                <div class="leader-title">{{i.game}}</div>
+              </div>
+            </div>
+            <div class="leader-amount"><i class="fas fa-coins gold-icon"></i>{{i.amount}}</div>
+          </div>
+
+
+        {% elif i.position == 9 %}
+
+          <div class="leader-card">
+            <div class="leader-info">
+              <div class="leader-rank">9</div>
+              <div>
+                <div class="leader-name">{{i.username}}</div>
+                <div class="leader-title">{{i.game}}</div>
+              </div>
+            </div>
+            <div class="leader-amount"><i class="fas fa-coins gold-icon"></i>{{i.amount}}</div>
+          </div>
+
+
+
+        {% elif i.position == 10 %}
+
+          <div class="leader-card">
+            <div class="leader-info">
+              <div class="leader-rank">10</div>
+              <div>
+                <div class="leader-name">{{i.username}}</div>
+                <div class="leader-title">{{i.game}}</div>
+              </div>
+            </div>
+            <div class="leader-amount"><i class="fas fa-coins gold-icon"></i>{{i.amount}}</div>
+          </div>
+
+
+        {% endif %}
+      {% endfor %}
+
+  </div>
+
+
+  {%  else %}
+
+    <!-- Empty State Content -->
+    <div class="empty-state">
+      <i class="fas fa-ranking-star empty-icon animate__animated animate__zoomInDown"></i>
+      <div class="empty-message">Leaderboard is Currently Empty</div>
+      <div class="subtext">No top players yet. Start playing and climb your way<br>to the top of the leaderboard!</div>
+      <button class="btn btn-view mt-4" onclick="startGame()">
+        <i class="fas fa-gamepad me-2"></i> Play Now
+      </button>
+    </div>
+
+  {% endif %}
+
+  <!-- Car Game Modal -- Show All Challenge Modal -->
+  <div class="modal fade" id="showGameModal" tabindex="-1" aria-labelledby="carGameModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-white animate__animated animate__fadeInDown rounded-4 p-3" style="border: 1px solid orange;">
+        <div class="modal-header border-0">
+          <h5 class="modal-title text-warning" id="carGameModalLabel">
+            <i class="fas fa-gamepad me-2 text-orange"></i>Game Invite
+          </h5>
+        </div>
+        <div class="modal-body text-center">
+          <p class="fs-5"><span class="text-warning fw-bold" id="show_challenger_username_modal">@lekan</span> wants to challenge you to a <span class="text-warning fw-bold" id="show_challenge_game_type_modal">Whot</span> game, with a stake of <span class="text-warning fw-bold" id="show_challenge_amount_modal">1,000 </span><i class="fas fa-coins gold-icon mx-2"></i>. Do you want to play?</p>
+          <div class="d-flex justify-content-center gap-3 mt-4">
+            <button class="btn btn-orange px-4 py-2 shadow" id="accept_challenge_button">
+              <i class="fas fa-gamepad me-1"></i> Accept
+            </button>
+            <button class="btn btn-secondary px-4 py-2 shadow" data-bs-dismiss="modal" id="decline_challenge_button">
+              <i class="fas fa-times me-1"></i> Decline
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+  <div class="bottom-nav">
+    <a href="{% url 'notification_alerts_page' %}"><i class="fas fa-bell" id="ringing"></i></a>
+    <a href="{% url 'chat_page' %}"><i class="fas fa-comment" id="chatting"></i></a>
+    <a href="{% url 'home_page' %}"><i class="fas fa-home"></i></a>
+    <a href="/profile/{{username}}"><i class="fas fa-user"></i></a>
+    <a href="/{{username}}/settings"><i class="fas fa-cog"></i></a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function startGame(){
+         window.location.href = '{% url 'start_game_page' %}';
+    }
+
+
+    function showChallenges(challenger,challenge_game,challenge_amount,challenge_id){
+  console.log("Called",challenger);
+  const showGameModal = new bootstrap.Modal(document.getElementById("showGameModal"));
+  var getModalChallengerUsername = document.getElementById("show_challenger_username_modal");
+  var getModalChallengeGameType = document.getElementById("show_challenge_game_type_modal");
+  var getModalChallengeAmount = document.getElementById("show_challenge_amount_modal");
+  var getModalAcceptBtn = document.getElementById("accept_challenge_button");
+  var getModalDeclineBtn = document.getElementById("decline_challenge_button");
+
+
+  getModalAcceptBtn.setAttribute('onclick',`acceptChallenge('${challenge_id}')`);
+  getModalDeclineBtn.setAttribute('onclick',`declineChallenge('${challenge_id}')`);
+  getModalChallengerUsername.innerText = `@${challenger}`;
+  getModalChallengeGameType.innerText = `${challenge_game}`;
+  getModalChallengeAmount.innerText = `${challenge_amount}`;
+  showGameModal.show();
+}
+
+  function acceptChallenge(id){
+        $.ajax({
+            type:"POST",
+            url:"/accept/challenge",
+            data:{
+                csrfmiddlewaretoken:$("input[name=csrfmiddlewaretoken]").val(),
+                challenge_id:id
+            },
+            success:function(){
+                location.reload()
+            },
+            error:function(){
+                location.reload()
+            }
+        })
+}
+
+
+
+
+function declineChallenge(id){
+        $.ajax({
+            type:"POST",
+            url:"/decline/challenge",
+            data:{
+                csrfmiddlewaretoken:$("input[name=csrfmiddlewaretoken]").val(),
+                challenge_id:id
+            },
+            success:function(){
+                location.reload()
+            },
+            error:function(){
+                location.reload()
+            }
+        })
+}
+
+  function newChatNotification(seen,last_sender){
+    if('{{username}}' !== last_sender){
+        if(seen){
+            console.log("remove from chat");
+            var getChatAlert = document.getElementById("chatting");
+            getChatAlert.classList.remove("message-alert");
+        }else{
+            console.log(`add to chat`);
+            var getChatAlert = document.getElementById("chatting");
+            getChatAlert.classList.add("message-alert");
+        }
+    }
+  };
+
+    <!--  SSE CONNECTION-->
+  const sse = new EventSource("/events/");
+  sse.onmessage = function(event){
+    try{
+      const data = JSON.parse(event.data);
+      if(data.type == "first_n"){
+        console.log(data.username);
+        console.log(data.balance);
+      }else if( data.type == "check_member_has_game" ){
+          window.location = "/checkGame";
+      }
+      else if( data.type == "member_challenges" ){
+        data.data.forEach(e  => {
+          showChallenges(e.challenger,e.challenge_game_type,e.amount,e.id);
+        })
+      }
+      else if( data.type == "chats" ){
+        data.chats.forEach(e  => {
+          console.log(e.date_created);
+          newChatNotification(e.last_message_seen,e.last_sender);
+      })
+      }
+      else if( data.type == "notification"){
+        var getNotificationIcon = document.getElementById("ringing");
+        getNotificationIcon.classList.add("ringing");
+      }
+      else if( data.type == "second_n"){
+        data.data.forEach(e => {
+          console.log(e.balance)
+        })
+      }
+    }
+    catch(err){
+      console.log("Failed to parse message");
+      location.reload();
+    }
+  };
+
+
+  sse.onerror = function(e){
+    console.log("SSE CONNECTION ERROR",e)
+  };
+  </script>
+</body>
+</html>

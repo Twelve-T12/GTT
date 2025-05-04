@@ -7,6 +7,9 @@ from main.models import Members, Admin_Setup, Transfer_History, Game_Delay_Repor
 from .models import All_Gtt_Whot_Cards,Gtt_Whot,Special_Member
 import random
 from datetime import datetime
+from django.utils.decorators import method_decorator
+from django.db import transaction
+from main.models import Notifications
 # Create your views here.
 
 class Gtt_Whott_Game(View):
@@ -17,15 +20,17 @@ class Gtt_Whott_Game(View):
             get_member = Members.objects.get(id=int(user_id))
             member_has_game = get_member.has_game
             member_game_type = get_member.current_game_type
+            member_balance = get_member.balance
             if member_has_game:
                 if not get_member.game_started:
-                    if member_game_type == "Golden Whot":
+                    if member_game_type == "whot":
                         member_opponent = get_member.current_opponent
                         member_is_challenger = get_member.is_challenger
                         challenge_amount = int(get_member.current_challenge_amount)
                         potential_wining_amount = int(challenge_amount * 2)
                         format_challenge_amount = "{:,}".format(challenge_amount)
                         context = {
+                            "balance":"{:,}".format(member_balance),
                             "is_challenger": member_is_challenger,
                             "opponent": member_opponent,
                             "format_amount": format_challenge_amount,
@@ -43,30 +48,31 @@ class Gtt_Whott_Game(View):
         else:
             return redirect("home_page")
 
-
+@method_decorator(transaction.atomic,name="dispatch")
 class Start_Gtt_Card_Game(View):
-    def get(self,request,amount):
+    def post(self,request,amount):
         if request.user.is_authenticated:
             user_id = request.user.id
             username = request.user.username
-            get_member = Members.objects.get(id=int(user_id))
+            get_member = Members.objects.select_for_update().get(id=int(user_id))
             member_opponent = get_member.current_opponent
-            get_member_opponent_id = User.objects.get(username=member_opponent).id
-            get_member_opponent_details = Members.objects.get(id=int(get_member_opponent_id))
+            get_member_opponent_id = User.objects.select_for_update().get(username=member_opponent).id
+            get_member_opponent_details = Members.objects.select_for_update().get(id=int(get_member_opponent_id))
             if get_member.current_opponent == member_opponent:
                 if get_member_opponent_details.current_opponent == username:
                     if get_member.balance >= int(amount) and get_member_opponent_details.balance >= int(amount):
                         if get_member.has_game:
                             if not get_member_opponent_details.game_started:
-                                if get_member.current_game_type == "Golden Whot" and get_member_opponent_details.current_game_type == "Golden Whot":
+                                if get_member.current_game_type == "whot" and get_member_opponent_details.current_game_type == "whot":
                                     get_all_cards = All_Gtt_Whot_Cards.objects.all()
-                                    create_new_gtt_whot_game = Gtt_Whot.objects.create(
+                                    create_new_gtt_whot_game = Gtt_Whot.objects.select_for_update()
+                                    create_new_gtt_whot_game.create(
                                         player_one=username,
                                         player_two=member_opponent,
                                         to_play=member_opponent
                                     )
-                                    get_game = Gtt_Whot.objects.get(player_one=username)
-                                    game_id = Gtt_Whot.objects.get(player_one=username).id
+                                    get_game = Gtt_Whot.objects.select_for_update().get(player_one=username)
+                                    game_id = Gtt_Whot.objects.select_for_update().get(player_one=username).id
                                     # making list for general market
                                     list_for_game_market = []
                                     for i in get_all_cards:
@@ -129,30 +135,35 @@ class Start_Gtt_Card_Game(View):
                                     get_admin = Admin_Setup.objects.get(id=1)
                                     for i in get_current_card:
                                         if int(i.card_number) == 1:
-                                            update_game = Gtt_Whot.objects.filter(player_one=username).update(
+                                            update_game = Gtt_Whot.objects.select_for_update().filter(player_one=username)
+                                            update_game.update(
                                             to_play = get_game.player_one,
                                         )
                                         elif int(i.card_number) == 2:
-                                            update_game = Gtt_Whot.objects.filter(player_one=username).update(
+                                            update_game = Gtt_Whot.objects.select_for_update().filter(player_one=username)
+                                            update_game.update(
                                             required_to_pick = True,
                                             how_many_required_to_pick = 2,
                                             player_required_to_pick = get_game.player_two,
                                         )
                                         elif int(i.card_number) == 14:
-                                            update_game = Gtt_Whot.objects.filter(player_one=username).update(
+                                            update_game = Gtt_Whot.objects.select_for_update().filter(player_one=username)
+                                            update_game.update(
                                             required_to_pick = True,
                                             how_many_required_to_pick = 1,
                                             player_required_to_pick = get_game.player_two,
                                         )
                                     if int(amount) <= 1000:
-                                        update_game = Gtt_Whot.objects.filter(player_one=username).update(
+                                        update_game = Gtt_Whot.objects.select_for_update().filter(player_one=username)
+                                        update_game.update(
                                             number_of_general_market=38,
                                             player_one_number_of_cards=5,
                                             player_two_number_of_cards=5,
                                             game_charges=int(get_admin.min_game_charges)
                                         )
                                     else:
-                                        update_game = Gtt_Whot.objects.filter(player_one=username).update(
+                                        update_game = Gtt_Whot.objects.select_for_update().filter(player_one=username)
+                                        update_game.update(
                                             number_of_general_market=38,
                                             player_one_number_of_cards=5,
                                             player_two_number_of_cards=5,
@@ -160,22 +171,23 @@ class Start_Gtt_Card_Game(View):
                                         )
                                     # updating player member
                                     game_wining_price = int(amount) * 2
-                                    get_member = Members.objects.get(id=int(user_id))
+                                    get_member = Members.objects.select_for_update().get(id=int(user_id))
                                     get_member_balance = int(get_member.balance)
                                     new_member_balance = get_member_balance - int(amount)
-                                    create_member_new_debit_transaction = Transfer_History.objects.create(
-                                        transaction_type="Debit",
-                                        receiver_name=f"Gtt-Whott Challenge With {member_opponent}",
+                                    create_member_new_debit_transaction = Transfer_History.objects.select_for_update().create(
+                                        transaction_type="Game Challenge",
+                                        receiver_name=f"Whot Game With @{member_opponent}",
                                         amount="{:,}".format(int(amount)),
                                         charges="",
                                         net_balance="{:,}".format(new_member_balance)
                                     )
-                                    get_member = Members.objects.get(id=int(user_id))
+                                    get_member = Members.objects.select_for_update().get(id=int(user_id))
                                     get_member_balance = int(get_member.balance)
                                     new_member_balance = get_member_balance - int(amount)
                                     get_member_number_of_play = int(get_member.number_of_play)
                                     new_member_no_of_play = get_member_number_of_play + 1
-                                    update_member = Members.objects.filter(id=int(user_id)).update(
+                                    update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                                    update_member.update(
                                         balance=new_member_balance,
                                         number_of_play=new_member_no_of_play,
                                         game_started=True,
@@ -188,24 +200,25 @@ class Start_Gtt_Card_Game(View):
                                     member_new_game_debit = get_member.transaction_history.add(
                                         create_member_new_debit_transaction)
                                     # updating member opponent
-                                    get_member_opponent_id = User.objects.get(username=member_opponent).id
+                                    get_member_opponent_id = User.objects.select_for_update().get(username=member_opponent).id
                                     get_member_opponent = Members.objects.get(id=int(get_member_opponent_id))
                                     get_member_opponent_balance = int(get_member_opponent.balance)
                                     new_member_opponent_balance = get_member_opponent_balance - int(amount)
-                                    create_member_opponent_new_debit_transaction = Transfer_History.objects.create(
-                                        transaction_type="Debit",
-                                        receiver_name=f"Gtt-Whott Challenge With {username}",
+                                    create_member_opponent_new_debit_transaction = Transfer_History.objects.select_for_update().create(
+                                        transaction_type="Game Challenge",
+                                        receiver_name=f"Whot Game With @{username}",
                                         amount="{:,}".format(int(amount)),
                                         charges = "",
                                         net_balance="{:,}".format(new_member_opponent_balance)
                                     )
-                                    get_member_opponent_id = User.objects.get(username=member_opponent).id
-                                    get_member_opponent = Members.objects.get(id=int(get_member_opponent_id))
+                                    get_member_opponent_id = User.objects.select_for_update().get(username=member_opponent).id
+                                    get_member_opponent = Members.objects.select_for_update().get(id=int(get_member_opponent_id))
                                     get_member_opponent_balance = int(get_member_opponent.balance)
                                     new_member_opponent_balance = get_member_opponent_balance - int(amount)
                                     get_member_opponent_number_of_play = int(get_member_opponent.number_of_play)
                                     new_member_opponent_no_of_play = get_member_opponent_number_of_play + 1
-                                    update_member_opponent = Members.objects.filter(id=int(get_member_opponent_id)).update(
+                                    update_member_opponent = Members.objects.select_for_update().filter(id=int(get_member_opponent_id))
+                                    update_member_opponent.update(
                                         balance=new_member_opponent_balance,
                                         number_of_play=new_member_opponent_no_of_play,
                                         game_started=True,
@@ -218,20 +231,23 @@ class Start_Gtt_Card_Game(View):
                                     member_opponent_new_debit_transfer = get_member_opponent.transaction_history.add(
                                         create_member_opponent_new_debit_transaction)
                                     new_golden_whot_no_of_play = int(get_admin.no_of_golden_Whot_played) + 1
-                                    update_admin = Admin_Setup.objects.filter(id=1).update(
+                                    update_admin = Admin_Setup.objects.select_for_update().filter(id=1)
+                                    update_admin.update(
                                         no_of_golden_Whot_played=int(new_golden_whot_no_of_play)
                                     )
                                     #updating today number of games play
                                     today = datetime.today().day
-                                    get_admin = Admin_Setup.objects.get(id=1)
+                                    get_admin = Admin_Setup.objects.select_for_update().get(id=1)
                                     get_admin_today = int(get_admin.today)
                                     if today == get_admin_today:
                                         new_today_games = int(get_admin.today_number_of_games) + 1
-                                        update_today_games = Admin_Setup.objects.filter(id=1).update(
+                                        update_today_games = Admin_Setup.objects.select_for_update().filter(id=1)
+                                        update_today_games.update(
                                             today_number_of_games = new_today_games,
                                         )
                                     else:
-                                        update_today = Admin_Setup.objects.filter(id=1).update(
+                                        update_today = Admin_Setup.objects.select_for_update().filter(id=1)
+                                        update_today.update(
                                             today = today,
                                             today_number_of_games = 1
                                         )
@@ -268,11 +284,52 @@ class Gtt_Whott_Game_Room(View):
                 member_opponent = get_member.current_opponent
                 get_member_opponent_id = User.objects.get(username=member_opponent).id
                 get_member_opponent_details = Members.objects.get(id=int(get_member_opponent_id))
-                get_member_opponent_no_of_cards = get_member_opponent_details.current_number_of_whott_cards
                 get_member_current_game_id = get_member.current_game_id
                 get_game_challenge_amount = get_member.current_challenge_amount
                 get_game_wining_price = get_member.current_game_wining_amount
                 get_game = Gtt_Whot.objects.get(id=int(get_member_current_game_id))
+                if request.user.username == get_game.player_one:
+                    player_one_total_amount_of_cards = []
+                    for i in get_game.player_one_cards.all():
+                        player_one_total_amount_of_cards.append(int(i.card_number))
+                    update_member_number_card = Members.objects.select_for_update().filter(id=int(user_id))
+                    update_member_number_card.update(
+                        current_number_of_whott_cards=int(len(player_one_total_amount_of_cards))
+                    )
+                    update_game_player_one_card = Gtt_Whot.objects.select_for_update().filter(id=int(get_member_current_game_id))
+                    update_game_player_one_card.update(player_one_number_of_cards = int(len(player_one_total_amount_of_cards)))
+                if request.user.username == get_game.player_two:
+                    player_two_total_amount_of_cards = []
+                    for i in get_game.player_two_cards.all():
+                        player_two_total_amount_of_cards.append(int(i.card_number))
+                    update_member_number_card = Members.objects.select_for_update().filter(id=int(user_id))
+                    update_member_number_card.update(
+                        current_number_of_whott_cards=int(len(player_two_total_amount_of_cards))
+                    )
+                    update_game_player_two_card = Gtt_Whot.objects.select_for_update().filter(
+                        id=int(get_member_current_game_id))
+                    update_game_player_two_card.update(
+                        player_two_number_of_cards=int(len(player_two_total_amount_of_cards)))
+                if member_opponent == get_game.player_one:
+                    player_one_total_amount_of_cards = []
+                    for i in get_game.player_one_cards.all():
+                        player_one_total_amount_of_cards.append(int(i.card_number))
+                    update_opp_number_card = Members.objects.select_for_update().filter(id=int(get_member_opponent_id))
+                    update_opp_number_card.update(
+                        current_number_of_whott_cards=int(len(player_one_total_amount_of_cards))
+                    )
+                    print(f"Player One: {len(player_one_total_amount_of_cards)}")
+                if member_opponent == get_game.player_two:
+                    player_two_total_amount_of_cards = []
+                    for i in get_game.player_two_cards.all():
+                        player_two_total_amount_of_cards.append(int(i.card_number))
+                    update_opp_number_card = Members.objects.select_for_update().filter(id=int(get_member_opponent_id))
+                    update_opp_number_card.update(
+                        current_number_of_whott_cards=int(len(player_two_total_amount_of_cards))
+                    )
+                    print(f"Player Two: {len(player_two_total_amount_of_cards)}")
+                get_member_opponent_no_of_cards = Members.objects.get(id=int(get_member_opponent_id)).current_number_of_whott_cards
+                print(f"OPP {get_member_opponent_no_of_cards}")
                 game_user_can_play = get_game.user_can_play
                 game_has_tie = get_game.has_tie
                 game_has_finished = get_game.game_finished
@@ -292,19 +349,16 @@ class Gtt_Whott_Game_Room(View):
                     player_one_total_amount_of_cards = []
                     for i in get_player_one_cards:
                         player_one_total_amount_of_cards.append(int(i.card_number))
-                    player_one_total_amount_of_cards = sum(player_one_total_amount_of_cards)
+                    print(len(player_one_total_amount_of_cards))
                     get_player_two_cards = get_game.player_two_cards.all()
                     player_two_total_amount_of_cards = []
                     for i in get_player_two_cards:
                         player_two_total_amount_of_cards.append(int(i.card_number))
-                    player_two_total_amount_of_cards = sum(player_two_total_amount_of_cards)
+                    print(len(player_two_total_amount_of_cards))
                     get_player_one_amount_of_cards = get_game.player_one_amount_of_cards
                     get_player_two_amount_of_cards = get_game.player_two_amount_of_cards
                     check_counted_cards = get_game.counted_cards
                     member_opponent_id_for_phone_number = int(User.objects.get(username=member_opponent).id)
-                    get_member_opponent_phone_number = Members.objects.get(id=member_opponent_id_for_phone_number).phone_number
-                    member_opponent_whatsapp_number = "234" + get_member_opponent_phone_number[1:]
-                    member_opponent_whatsapp_link = f"https://wa.me/{member_opponent_whatsapp_number}?text=Hi,%20My%20Name%20Is%20{request.user.username},%20I%20Am%20An%20Opponent%20From%20GTT..."
                     context = {
                         "potential_wining":"{:,}".format(get_game_wining_price),
                         "game_finished":game_has_finished,
@@ -313,10 +367,8 @@ class Gtt_Whott_Game_Room(View):
                         "no_of_cards_to_pick":no_cards_to_pick,
                         "game_winner":get_game_winner,
                         "player_won":get_player_won,
-                        "player_one_total_amount_of_cards":player_one_total_amount_of_cards,
-                        "player_two_total_amount_of_cards":player_two_total_amount_of_cards,
-                        "player_one_card_amount":get_player_one_amount_of_cards,
-                        "player_two_card_amount":get_player_two_amount_of_cards,
+                        "player_one_card_amount":sum(player_one_total_amount_of_cards),
+                        "player_two_card_amount":sum(player_two_total_amount_of_cards),
                         "number_of_cards":get_member_no_of_cards,
                         "counted_cards":check_counted_cards,
                         "can_play":game_user_can_play,
@@ -333,7 +385,6 @@ class Gtt_Whott_Game_Room(View):
                         "player_two":get_player_two,
                         "player_one_cards":get_player_one_cards,
                         "player_two_cards":get_player_two_cards,
-                        "opponent_whatsapp_link":member_opponent_whatsapp_link,
                         "opponent_gender":get_member_opponent_details.gender,
                         "is_special": get_member.is_special
                     }
@@ -345,23 +396,23 @@ class Gtt_Whott_Game_Room(View):
         else:
             return redirect("login_page")
 
-
+@method_decorator(transaction.atomic,name="dispatch")
 class Collect_Card(View):
     def post(self,request,id,card_shape,card_number):
         if request.user.is_authenticated:
             user_id = request.user.id
             username = request.user.username
-            get_member = Members.objects.get(id=int(user_id))
+            get_member = Members.objects.select_for_update().get(id=int(user_id))
             if get_member.game_started:
-                if get_member.current_game_type == "Golden Whot":
+                if get_member.current_game_type == "whot":
                     member_current_game_id = get_member.current_game_id
-                    get_game = Gtt_Whot.objects.get(id=int(member_current_game_id))
+                    get_game = Gtt_Whot.objects.select_for_update().get(id=int(member_current_game_id))
                     game_has_tie = get_game.has_tie
                     game_has_finished = get_game.game_finished
                     if not game_has_finished:
                         if get_game.to_play == username:
                             get_player_card_id = id
-                            get_card_details = All_Gtt_Whot_Cards.objects.get(id=int(get_player_card_id))
+                            get_card_details = All_Gtt_Whot_Cards.objects.select_for_update().get(id=int(get_player_card_id))
                             check_card_has_power = get_card_details.has_power
                             get_player_card_shape = card_shape
                             get_player_card_number = card_number
@@ -385,7 +436,8 @@ class Collect_Card(View):
                                                         get_player_card_id)
                                                     new_player_one_no_of_cards = int(
                                                         get_game.player_one_number_of_cards) - 1
-                                                    update_player_one_number_game = Gtt_Whot.objects.filter(
+                                                    update_player_one_number_game = Gtt_Whot.objects.select_for_update()
+                                                    update_player_one_number_game.filter(
                                                         id=int(member_current_game_id)).update(
                                                         player_one_number_of_cards=new_player_one_no_of_cards,
                                                         to_play=get_member.current_opponent,
@@ -394,7 +446,8 @@ class Collect_Card(View):
                                                     )
                                                     new_member_number_of_whott_cards = int(
                                                         get_member.current_number_of_whott_cards) - 1
-                                                    update_member = Members.objects.filter(id=int(user_id)).update(
+                                                    update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                                                    update_member.update(
                                                         current_number_of_whott_cards=new_member_number_of_whott_cards
                                                     )
                                                     check_get_game = Gtt_Whot.objects.get(id=int(member_current_game_id))
@@ -404,8 +457,10 @@ class Collect_Card(View):
                                                         check_get_game.player_two_number_of_cards)
                                                     check_number_of_general_market = int(
                                                         check_get_game.number_of_general_market)
+                                                    print("checking problem p1")
                                                     if check_player_one_number_of_cards == 0 and check_player_two_number_of_cards >= 1:
-                                                        update_game = Gtt_Whot.objects.filter(
+                                                        update_game = Gtt_Whot.objects.select_for_update()
+                                                        update_game.filter(
                                                             id=int(member_current_game_id)).update(
                                                             user_can_play=False,
                                                             player_won =True,
@@ -414,8 +469,9 @@ class Collect_Card(View):
                                                             hold_on = False
                                                         )
                                                     elif check_player_two_number_of_cards == 0 and  check_player_one_number_of_cards >= 1:
-                                                        update_game = Gtt_Whot.objects.filter(
-                                                            id=int(member_current_game_id)).update(
+                                                        update_game = Gtt_Whot.objects.select_for_update().filter(
+                                                            id=int(member_current_game_id))
+                                                        update_game.update(
                                                             user_can_play=False,
                                                             player_won=True,
                                                             game_winner=get_game.player_two,
@@ -423,8 +479,9 @@ class Collect_Card(View):
                                                             hold_on = False
                                                         )
                                                     elif check_number_of_general_market == 0 and check_player_one_number_of_cards >= 1 and check_player_two_number_of_cards >= 1:
-                                                        update_game = Gtt_Whot.objects.filter(
-                                                            id=int(member_current_game_id)).update(
+                                                        update_game = Gtt_Whot.objects.select_for_update().filter(
+                                                            id=int(member_current_game_id))
+                                                        update_game.update(
                                                             user_can_play=False,
                                                             has_tie=True,
                                                             game_reload = True,
@@ -435,8 +492,9 @@ class Collect_Card(View):
                                                         get_player_card_id)
                                                     new_player_two_no_of_cards = int(
                                                         get_game.player_two_number_of_cards) - 1
-                                                    update_player_two_number_game = Gtt_Whot.objects.filter(
-                                                        id=int(member_current_game_id)).update(
+                                                    update_player_two_number_game = Gtt_Whot.objects.select_for_update().filter(
+                                                        id=int(member_current_game_id))
+                                                    update_player_two_number_game.update(
                                                         player_two_number_of_cards=new_player_two_no_of_cards,
                                                         to_play=get_member.current_opponent,
                                                         game_reload=True,
@@ -444,7 +502,8 @@ class Collect_Card(View):
                                                     )
                                                     new_member_number_of_whott_cards = int(
                                                         get_member.current_number_of_whott_cards) - 1
-                                                    update_member = Members.objects.filter(id=int(user_id)).update(
+                                                    update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                                                    update_member.update(
                                                         current_number_of_whott_cards=new_member_number_of_whott_cards
                                                     )
                                                     check_get_game = Gtt_Whot.objects.get(id=int(member_current_game_id))
@@ -455,8 +514,9 @@ class Collect_Card(View):
                                                     check_number_of_general_market = int(
                                                         check_get_game.number_of_general_market)
                                                     if check_player_one_number_of_cards == 0 and check_player_two_number_of_cards >= 1:
-                                                        update_game = Gtt_Whot.objects.filter(
-                                                            id=int(member_current_game_id)).update(
+                                                        update_game = Gtt_Whot.objects.select_for_update().filter(
+                                                            id=int(member_current_game_id))
+                                                        update_game.update(
                                                             player_won=True,
                                                             game_winner=get_game.player_one,
                                                             user_can_play=False,
@@ -464,7 +524,9 @@ class Collect_Card(View):
                                                             hold_on = False
                                                         )
                                                     elif check_player_two_number_of_cards == 0 and check_player_one_number_of_cards >= 1:
-                                                        update_game = Gtt_Whot.objects.filter(
+                                                        print("checking problem p12")
+                                                        update_game = Gtt_Whot.objects.select_for_update()
+                                                        update_game.filter(
                                                             id=int(member_current_game_id)).update(
                                                             player_won=True,
                                                             game_winner=get_game.player_two,
@@ -473,13 +535,20 @@ class Collect_Card(View):
                                                             hold_on = False
                                                         )
                                                     elif check_number_of_general_market == 0 and check_player_one_number_of_cards >= 1 and check_player_two_number_of_cards >= 1:
-                                                        update_game = Gtt_Whot.objects.filter(
+                                                        update_game = Gtt_Whot.objects.select_for_update()
+                                                        update_game.filter(
                                                             id=int(member_current_game_id)).update(
                                                             has_tie=True,
                                                             user_can_play=False,
                                                             game_reload=True,
                                                             hold_on = False
                                                         )
+                                                    print("checking problem p2")
+
+                                                update_game_timer = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                                                update_game_timer.update(
+                                                    game_timer = 60
+                                                )
                                                 return redirect("gttWhot_game_room_page")
                                             else:
                                                 return redirect(
@@ -489,7 +558,8 @@ class Collect_Card(View):
                                     else:
                                         return HttpResponse("Invalid Card")
                             else:
-                                update_game = Gtt_Whot.objects.filter(
+                                update_game = Gtt_Whot.objects.select_for_update()
+                                update_game.filter(
                                     id=int(member_current_game_id)).update(
                                     has_tie=True,
                                     user_can_play=False,
@@ -507,16 +577,18 @@ class Collect_Card(View):
         else:
             return redirect("login_page")
 
+
+@method_decorator(transaction.atomic,name="dispatch")
 class Game_General_Market(View):
     def post(self,request):
         if request.user.is_authenticated:
             user_id = request.user.id
             username = request.user.username
-            get_member = Members.objects.get(id=int(user_id))
+            get_member = Members.objects.select_for_update().get(id=int(user_id))
             member_current_game_id = get_member.current_game_id
             get_game = Gtt_Whot.objects.get(id=int(member_current_game_id))
             if get_member.game_started:
-                if get_member.current_game_type == "Golden Whot":
+                if get_member.current_game_type == "whot":
                     if int(get_game.number_of_general_market) >= 1:
                         if not get_game.required_to_pick:
                             if get_game.to_play == username:
@@ -535,14 +607,16 @@ class Game_General_Market(View):
                                         remove_card_general_market = get_game.general_market.remove(i)
                                     new_no_player_one_cards = int(get_game.player_one_number_of_cards) + 1
                                     new_no_general_market = int(get_game.number_of_general_market) - 1
-                                    update_player_one = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                                    update_player_one = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                                    update_player_one.update(
                                         number_of_general_market = new_no_general_market,
                                         player_one_number_of_cards = new_no_player_one_cards,
                                         to_play = get_member.current_opponent,
                                         game_reload = True,
                                         hold_on = False
                                     )
-                                    update_member = Members.objects.filter(id=int(user_id)).update(
+                                    update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                                    update_member.update(
                                         current_number_of_whott_cards = new_no_player_one_cards
                                     )
                                 # Player Two Check
@@ -552,23 +626,31 @@ class Game_General_Market(View):
                                         remove_card_general_market = get_game.general_market.remove(i)
                                     new_no_player_two_cards = int(get_game.player_two_number_of_cards) + 1
                                     new_no_general_market = int(get_game.number_of_general_market) - 1
-                                    update_player_one = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                                    update_player_one = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                                    update_player_one.update(
                                         number_of_general_market = new_no_general_market,
                                         player_two_number_of_cards = new_no_player_two_cards,
                                         to_play = get_member.current_opponent,
                                         game_reload = True,
                                         hold_on = False
                                     )
-                                    update_member = Members.objects.filter(id=int(user_id)).update(
+                                    update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                                    update_member.update(
                                         current_number_of_whott_cards = new_no_player_two_cards
                                     )
+
+                                update_game_timer = Gtt_Whot.objects.select_for_update().filter(
+                                    id=int(member_current_game_id))
+                                update_game_timer.update(
+                                    game_timer=60
+                                )
                                 return redirect("gttWhot_game_room_page")
                             else:
                                 return HttpResponse("Not Your Turn")
                         else:
                             return redirect("gttWhot_general_market_page")
                     else:
-                        check_get_game = Gtt_Whot.objects.get(id=int(member_current_game_id))
+                        check_get_game = Gtt_Whot.objects.select_for_update().get(id=int(member_current_game_id))
                         check_player_one_number_of_cards = int(
                             check_get_game.player_one_number_of_cards)
                         check_player_two_number_of_cards = int(
@@ -576,7 +658,8 @@ class Game_General_Market(View):
                         check_number_of_general_market = int(
                             check_get_game.number_of_general_market)
                         if check_player_one_number_of_cards == 0 and check_player_two_number_of_cards >= 1:
-                            update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                            update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                            update_game.update(
                                 user_can_play = False,
                                 player_won = True,
                                 game_winner = get_game.player_one,
@@ -584,7 +667,8 @@ class Game_General_Market(View):
                                 hold_on = False
                             )
                         elif check_player_two_number_of_cards == 0  and check_player_one_number_of_cards >= 1:
-                            update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                            update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                            update_game.update(
                                 user_can_play = False,
                                 player_won=True,
                                 game_winner=get_game.player_two,
@@ -592,7 +676,8 @@ class Game_General_Market(View):
                                 hold_on = False
                             )
                         elif check_number_of_general_market == 0 and check_player_one_number_of_cards >= 1 and check_player_two_number_of_cards >= 1:
-                            update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                            update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                            update_game.update(
                                 user_can_play = False,
                                 has_tie = True,
                                 game_reload =True,
@@ -610,11 +695,11 @@ class Game_General_Market(View):
         if request.user.is_authenticated:
             user_id = request.user.id
             username = request.user.username
-            get_member = Members.objects.get(id=int(user_id))
+            get_member = Members.objects.select_for_update().get(id=int(user_id))
             member_current_game_id = get_member.current_game_id
-            get_game = Gtt_Whot.objects.get(id=int(member_current_game_id))
+            get_game = Gtt_Whot.objects.select_for_update().get(id=int(member_current_game_id))
             if get_member.game_started:
-                if get_member.current_game_type == "Golden Whot":
+                if get_member.current_game_type == "whot":
                     if get_game.required_to_pick:
                         get_game_player_required_to_pick = get_game.player_required_to_pick
                         get_game_how_many_required_to_pick = get_game.how_many_required_to_pick
@@ -637,7 +722,8 @@ class Game_General_Market(View):
                                                 get_game.general_market.remove(i.id)
                                             new_no_of_general_market = int(get_game.number_of_general_market) - 2
                                             new_player_one_no_of_cards = int(get_game.player_one_number_of_cards) + 2
-                                            update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                                            update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                                            update_game.update(
                                                 number_of_general_market = new_no_of_general_market,
                                                 player_one_number_of_cards = new_player_one_no_of_cards,
                                                 to_play = get_member.current_opponent,
@@ -645,8 +731,14 @@ class Game_General_Market(View):
                                                 required_to_pick = False,
                                                 hold_on= False
                                             )
-                                            update_member = Members.objects.filter(id=int(user_id)).update(
+                                            update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                                            update_member.update(
                                                 current_number_of_whott_cards = new_player_one_no_of_cards
+                                            )
+                                            update_game_timer = Gtt_Whot.objects.select_for_update().filter(
+                                                id=int(member_current_game_id))
+                                            update_game_timer.update(
+                                                game_timer=60
                                             )
                                             return redirect("gttWhot_game_room_page")
                                         elif username == get_game_player_required_to_pick and get_game_player_required_to_pick == get_game.player_two:
@@ -656,7 +748,8 @@ class Game_General_Market(View):
                                                 get_game.general_market.remove(i.id)
                                             new_no_of_general_market = int(get_game.number_of_general_market) - 2
                                             new_player_two_no_of_cards = int(get_game.player_two_number_of_cards) + 2
-                                            update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                                            update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                                            update_game.update(
                                                 number_of_general_market=new_no_of_general_market,
                                                 player_two_number_of_cards=new_player_two_no_of_cards,
                                                 to_play=get_member.current_opponent,
@@ -664,8 +757,14 @@ class Game_General_Market(View):
                                                 required_to_pick=False,
                                                 hold_on=False
                                             )
-                                            update_member = Members.objects.filter(id=int(user_id)).update(
+                                            update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                                            update_member.update(
                                                 current_number_of_whott_cards=new_player_two_no_of_cards
+                                            )
+                                            update_game_timer = Gtt_Whot.objects.select_for_update().filter(
+                                                id=int(member_current_game_id))
+                                            update_game_timer.update(
+                                                game_timer=60
                                             )
                                             return redirect("gttWhot_game_room_page")
                                     else:
@@ -682,7 +781,8 @@ class Game_General_Market(View):
                                                 get_game.general_market.remove(i.id)
                                             new_no_of_general_market = int(get_game.number_of_general_market) - 1
                                             new_player_one_no_of_cards = int(get_game.player_one_number_of_cards) + 1
-                                            update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                                            update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                                            update_game.update(
                                                 number_of_general_market = new_no_of_general_market,
                                                 player_one_number_of_cards = new_player_one_no_of_cards,
                                                 to_play = get_member.current_opponent,
@@ -692,8 +792,14 @@ class Game_General_Market(View):
                                                 user_can_play = False,
                                                 hold_on = False
                                             )
-                                            update_member = Members.objects.filter(id=int(user_id)).update(
+                                            update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                                            update_member.update(
                                                 current_number_of_whott_cards = new_player_one_no_of_cards
+                                            )
+                                            update_game_timer = Gtt_Whot.objects.select_for_update().filter(
+                                                id=int(member_current_game_id))
+                                            update_game_timer.update(
+                                                game_timer=60
                                             )
                                             return redirect("gttWhot_game_room_page")
                                         elif username == get_game_player_required_to_pick and get_game_player_required_to_pick == get_game.player_two:
@@ -703,7 +809,8 @@ class Game_General_Market(View):
                                                 get_game.general_market.remove(i.id)
                                             new_no_of_general_market = int(get_game.number_of_general_market) - 1
                                             new_player_two_no_of_cards = int(get_game.player_two_number_of_cards) + 1
-                                            update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                                            update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                                            update_game.update(
                                                 number_of_general_market=new_no_of_general_market,
                                                 player_two_number_of_cards=new_player_two_no_of_cards,
                                                 to_play=get_member.current_opponent,
@@ -713,8 +820,14 @@ class Game_General_Market(View):
                                                 user_can_play = False,
                                                 hold_on = False
                                             )
-                                            update_member = Members.objects.filter(id=int(user_id)).update(
+                                            update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                                            update_member.update(
                                                 current_number_of_whott_cards=new_player_two_no_of_cards
+                                            )
+                                            update_game_timer = Gtt_Whot.objects.select_for_update().filter(
+                                                id=int(member_current_game_id))
+                                            update_game_timer.update(
+                                                game_timer=60
                                             )
                                         return redirect("gttWhot_game_room_page")
                                 else:
@@ -731,7 +844,8 @@ class Game_General_Market(View):
                                             get_game.general_market.remove(i.id)
                                         new_no_of_general_market = int(get_game.number_of_general_market) - 1
                                         new_player_one_no_of_cards = int(get_game.player_one_number_of_cards) + 1
-                                        update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                                        update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                                        update_game.update(
                                             number_of_general_market = new_no_of_general_market,
                                             player_one_number_of_cards = new_player_one_no_of_cards,
                                             to_play = get_member.current_opponent,
@@ -741,7 +855,13 @@ class Game_General_Market(View):
                                             user_can_play = False,
                                             hold_on = False
                                         )
-                                        update_member = Members.objects.filter(id=int(user_id)).update(
+                                        update_game_timer = Gtt_Whot.objects.select_for_update().filter(
+                                            id=int(member_current_game_id))
+                                        update_game_timer.update(
+                                            game_timer=60
+                                        )
+                                        update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                                        update_member.update(
                                             current_number_of_whott_cards = new_player_one_no_of_cards
                                         )
                                         return redirect("gttWhot_game_room_page")
@@ -752,7 +872,8 @@ class Game_General_Market(View):
                                             get_game.general_market.remove(i.id)
                                         new_no_of_general_market = int(get_game.number_of_general_market) - 1
                                         new_player_two_no_of_cards = int(get_game.player_two_number_of_cards) + 1
-                                        update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                                        update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                                        update_game.update(
                                             number_of_general_market=new_no_of_general_market,
                                             player_two_number_of_cards=new_player_two_no_of_cards,
                                             to_play=get_member.current_opponent,
@@ -762,8 +883,14 @@ class Game_General_Market(View):
                                             user_can_play = False,
                                             hold_on = False
                                         )
-                                        update_member = Members.objects.filter(id=int(user_id)).update(
+                                        update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                                        update_member.update(
                                             current_number_of_whott_cards=new_player_two_no_of_cards
+                                        )
+                                        update_game_timer = Gtt_Whot.objects.select_for_update().filter(
+                                            id=int(member_current_game_id))
+                                        update_game_timer.update(
+                                            game_timer=60
                                         )
                                     return redirect("gttWhot_game_room_page")
                             return redirect("gttWhot_game_room_page")
@@ -783,7 +910,8 @@ class Game_General_Market(View):
                                     get_game.general_market.remove(i.id)
                                 new_no_of_general_market = int(get_game.number_of_general_market) - 1
                                 new_player_one_no_of_cards = int(get_game.player_one_number_of_cards) + 1
-                                update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                                update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                                update_game.update(
                                     number_of_general_market=new_no_of_general_market,
                                     player_one_number_of_cards=new_player_one_no_of_cards,
                                     to_play=get_member.current_opponent,
@@ -791,8 +919,14 @@ class Game_General_Market(View):
                                     required_to_pick=False,
                                     hold_on = False
                                 )
-                                update_member = Members.objects.filter(id=int(user_id)).update(
+                                update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                                update_member.update(
                                     current_number_of_whott_cards=new_player_one_no_of_cards
+                                )
+                                update_game_timer = Gtt_Whot.objects.select_for_update().filter(
+                                    id=int(member_current_game_id))
+                                update_game_timer.update(
+                                    game_timer=60
                                 )
                                 return redirect("gttWhot_game_room_page")
                             elif username == get_game_player_required_to_pick and get_game_player_required_to_pick == get_game.player_two:
@@ -802,7 +936,8 @@ class Game_General_Market(View):
                                     get_game.general_market.remove(i.id)
                                 new_no_of_general_market = int(get_game.number_of_general_market) - 1
                                 new_player_two_no_of_cards = int(get_game.player_two_number_of_cards) + 1
-                                update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                                update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                                update_game.update(
                                     number_of_general_market=new_no_of_general_market,
                                     player_two_number_of_cards=new_player_two_no_of_cards,
                                     to_play=get_member.current_opponent,
@@ -810,8 +945,14 @@ class Game_General_Market(View):
                                     required_to_pick=False,
                                     hold_on = False
                                 )
-                                update_member = Members.objects.filter(id=int(user_id)).update(
+                                update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                                update_member.update(
                                     current_number_of_whott_cards=new_player_two_no_of_cards
+                                )
+                                update_game_timer = Gtt_Whot.objects.select_for_update().filter(
+                                    id=int(member_current_game_id))
+                                update_game_timer.update(
+                                    game_timer=60
                                 )
                                 return redirect("gttWhot_game_room_page")
                             return redirect("gttWhot_game_room_page")
@@ -824,15 +965,16 @@ class Game_General_Market(View):
         else:
             return redirect("home_page")
 
+
+@method_decorator(transaction.atomic,name="dispatch")
 class Count_Cards(View):
     def post(self,request):
         if request.user.is_authenticated:
             user_id = request.user.id
-            username = request.user.username
-            get_member = Members.objects.get(id=int(user_id))
+            get_member = Members.objects.select_for_update().get(id=int(user_id))
             if get_member.game_started:
                 member_current_game_id = get_member.current_game_id
-                get_game = Gtt_Whot.objects.get(id=int(member_current_game_id))
+                get_game = Gtt_Whot.objects.select_for_update().get(id=int(member_current_game_id))
                 get_player_one_cards = get_game.player_one_cards.all()
                 player_one_cards_amount_list = []
                 for i in get_player_one_cards:
@@ -844,7 +986,8 @@ class Count_Cards(View):
                     player_two_cards_amount_list.append(int(i.card_number))
                 player_two_amount = sum(player_two_cards_amount_list)
                 if int(player_one_amount) < int(player_two_amount):
-                    update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                    update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                    update_game.update(
                         game_winner = get_game.player_one,
                         counted_cards = True,
                         player_one_amount_of_cards = int(player_one_amount),
@@ -853,7 +996,8 @@ class Count_Cards(View):
                         hold_on = False,
                     )
                 elif int(player_one_amount) > int(player_two_amount):
-                    update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                    update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                    update_game.update(
                         game_winner=get_game.player_two,
                         counted_cards=True,
                         player_one_amount_of_cards=int(player_one_amount),
@@ -862,7 +1006,8 @@ class Count_Cards(View):
                         hold_on = False,
                     )
                 else:
-                    update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                    update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                    update_game.update(
                         game_winner = "Draw",
                         counted_cards=True,
                         player_one_amount_of_cards=int(player_one_amount),
@@ -876,6 +1021,8 @@ class Count_Cards(View):
         else:
             return redirect("login_page")
 
+
+@method_decorator(transaction.atomic,name="dispatch")
 class Power_Cards(View):
     def get(self,request,id,card_shape,card_number):
         if request.user.is_authenticated:
@@ -883,9 +1030,9 @@ class Power_Cards(View):
             user_id = request.user.id
             get_card_details = All_Gtt_Whot_Cards.objects.get(id=int(id))
             get_card_requirement = get_card_details.requirement
-            get_member = Members.objects.get(id=int(user_id))
+            get_member = Members.objects.select_for_update().get(id=int(user_id))
             member_current_game_id = get_member.current_game_id
-            get_game = Gtt_Whot.objects.get(id=int(member_current_game_id))
+            get_game = Gtt_Whot.objects.select_for_update().get(id=int(member_current_game_id))
             get_player_one = get_game.player_one
             get_player_two = get_game.player_two
             if get_card_requirement == "HOLD ON":
@@ -897,29 +1044,38 @@ class Power_Cards(View):
                 if get_player_one == username:
                     removing_card_player_one = get_game.player_one_cards.remove(id)
                     new_player_one_no_of_cards = int(get_game.player_one_number_of_cards) - 1
-                    update_player_one_number_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                    update_player_one_number_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                    update_player_one_number_game.update(
                         player_one_number_of_cards=new_player_one_no_of_cards,
                         to_play=username,
                         game_reload=True,
                         hold_on = True
                     )
                     new_member_number_of_whott_cards = int(get_member.current_number_of_whott_cards) - 1
-                    update_member = Members.objects.filter(id=int(user_id)).update(
+                    update_member = Members.objects.filter(id=int(user_id))
+                    update_member.update(
                         current_number_of_whott_cards=new_member_number_of_whott_cards
                     )
                 if get_player_two == username:
                     removing_card_player_two = get_game.player_two_cards.remove(id)
                     new_player_two_no_of_cards = int(get_game.player_two_number_of_cards) - 1
-                    update_player_two_number_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                    update_player_two_number_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                    update_player_two_number_game.update(
                         player_two_number_of_cards=new_player_two_no_of_cards,
                         to_play=username,
                         game_reload=True,
                         hold_on = True
                     )
                     new_member_number_of_whott_cards = int(get_member.current_number_of_whott_cards) - 1
-                    update_member = Members.objects.filter(id=int(user_id)).update(
+                    update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                    update_member.update(
                         current_number_of_whott_cards=new_member_number_of_whott_cards
                     )
+                update_game_timer = Gtt_Whot.objects.select_for_update().filter(
+                    id=int(member_current_game_id))
+                update_game_timer.update(
+                    game_timer=60
+                )
                 return redirect("gttWhot_game_room_page")
             elif get_card_requirement == "PICK TWO":
                 get_game_current_card = get_game.current_card.all()
@@ -930,7 +1086,8 @@ class Power_Cards(View):
                     get_game.player_one_cards.remove(id)
                     new_player_one_no_of_cards = int(get_game.player_one_number_of_cards) - 1
                     member_opponent = get_member.current_opponent
-                    update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                    update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                    update_game.update(
                         player_one_number_of_cards = new_player_one_no_of_cards,
                         to_play=member_opponent,
                         game_reload=True,
@@ -939,15 +1096,22 @@ class Power_Cards(View):
                         player_required_to_pick=member_opponent,
                         hold_on = False
                     )
-                    update_member = Members.objects.filter(id=int(user_id)).update(
+                    update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                    update_member.update(
                         current_number_of_whott_cards = new_player_one_no_of_cards
+                    )
+                    update_game_timer = Gtt_Whot.objects.select_for_update().filter(
+                        id=int(member_current_game_id))
+                    update_game_timer.update(
+                        game_timer=60
                     )
                     return redirect("gttWhot_game_room_page")
                 elif username == get_game.player_two:
                     get_game.player_two_cards.remove(id)
                     new_player_two_no_of_cards = int(get_game.player_two_number_of_cards) - 1
                     member_opponent = get_member.current_opponent
-                    update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                    update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                    update_game.update(
                         player_two_number_of_cards = new_player_two_no_of_cards,
                         to_play=member_opponent,
                         game_reload=True,
@@ -956,8 +1120,14 @@ class Power_Cards(View):
                         player_required_to_pick=member_opponent,
                         hold_on = False
                     )
-                    update_member = Members.objects.filter(id=int(user_id)).update(
+                    update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                    update_member.update(
                         current_number_of_whott_cards=new_player_two_no_of_cards
+                    )
+                    update_game_timer = Gtt_Whot.objects.select_for_update().filter(
+                        id=int(member_current_game_id))
+                    update_game_timer.update(
+                        game_timer=60
                     )
                     return redirect("gttWhot_game_room_page")
             elif get_card_requirement == "GENERAL MARKET":
@@ -969,7 +1139,8 @@ class Power_Cards(View):
                     get_game.player_one_cards.remove(id)
                     new_player_one_no_of_cards = int(get_game.player_one_number_of_cards) - 1
                     member_opponent = get_member.current_opponent
-                    update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                    update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                    update_game.update(
                         player_one_number_of_cards=new_player_one_no_of_cards,
                         to_play=member_opponent,
                         game_reload=True,
@@ -978,15 +1149,22 @@ class Power_Cards(View):
                         player_required_to_pick=member_opponent,
                         hold_on = False
                     )
-                    update_member = Members.objects.filter(id=int(user_id)).update(
+                    update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                    update_member.update(
                         current_number_of_whott_cards=new_player_one_no_of_cards
+                    )
+                    update_game_timer = Gtt_Whot.objects.select_for_update().filter(
+                        id=int(member_current_game_id))
+                    update_game_timer.update(
+                        game_timer=60
                     )
                     return redirect("gttWhot_game_room_page")
                 elif username == get_game.player_two:
                     get_game.player_two_cards.remove(id)
                     new_player_two_no_of_cards = int(get_game.player_two_number_of_cards) - 1
                     member_opponent = get_member.current_opponent
-                    update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                    update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                    update_game.update(
                         player_two_number_of_cards=new_player_two_no_of_cards,
                         to_play=member_opponent,
                         game_reload=True,
@@ -995,8 +1173,14 @@ class Power_Cards(View):
                         player_required_to_pick=member_opponent,
                         hold_on = False
                     )
-                    update_member = Members.objects.filter(id=int(user_id)).update(
+                    update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                    update_member.update(
                         current_number_of_whott_cards=new_player_two_no_of_cards
+                    )
+                    update_game_timer = Gtt_Whot.objects.select_for_update().filter(
+                        id=int(member_current_game_id))
+                    update_game_timer.update(
+                        game_timer=60
                     )
                     return redirect("gttWhot_game_room_page")
                 else:
@@ -1018,39 +1202,43 @@ class Gtt_Whot_Game_Reload(View):
         else:
             return redirect("login_page")
 
+@method_decorator(transaction.atomic,name="dispatch")
 class Update_Game_Reload(View):
     def get(self,request):
         if request.user.is_authenticated:
             user_id = request.user.id
             member_current_game_id = Members.objects.get(id=user_id).current_game_id
-            update_game_reload = Gtt_Whot.objects.filter(id=member_current_game_id).update(
+            update_game_reload = Gtt_Whot.objects.select_for_update().filter(id=member_current_game_id)
+            update_game_reload.update(
                 game_reload = False
             )
             return HttpResponse(True)
         else:
             return redirect("login_page")
 
+
+
+@method_decorator(transaction.atomic,name="dispatch")
 class End_Game(View):
     def post(self,request):
         if request.user.is_authenticated:
-            username = request.user.username
             user_id = request.user.id
-            get_member = Members.objects.get(id=int(user_id))
+            get_member = Members.objects.select_for_update().get(id=int(user_id))
             if get_member.game_started:
                 member_current_game_id = get_member.current_game_id
-                get_game = Gtt_Whot.objects.get(id=int(member_current_game_id))
+                get_game = Gtt_Whot.objects.select_for_update().get(id=int(member_current_game_id))
                 if not get_game.game_finished:
                     get_game_winner = get_game.game_winner
                     if get_game.player_one == get_game_winner:
-                        get_player_id = User.objects.get(username=get_game.player_one).id
-                        get_member = Members.objects.get(id=int(get_player_id))
+                        get_player_id = User.objects.select_for_update().get(username=get_game.player_one).id
+                        get_member = Members.objects.select_for_update().get(id=int(get_player_id))
                         get_current_winning_amount = get_member.current_game_wining_amount
                         get_game_charges = get_game.game_charges
                         # Create New Credit Transaction
                         net_credit_balance = int(get_member.balance) + int(get_current_winning_amount)
                         create_credit_transaction_history = Transfer_History.objects.create(
-                            transaction_type = "Credit",
-                            sender_name = f"Winning '{get_member.current_opponent}'",
+                            transaction_type = "Game_Win",
+                            sender_name = f"Winning '@{get_member.current_opponent}'",
                             amount = "{:,}".format(int(get_current_winning_amount)),
                             net_balance="{:,}".format(net_credit_balance)
                         )
@@ -1059,44 +1247,76 @@ class End_Game(View):
                         net_debit_balance = int(get_member.balance) + int(get_current_winning_amount) - int(
                             get_game_charges)
                         create_debit_transaction_history = Transfer_History.objects.create(
-                            transaction_type = "Debit",
+                            transaction_type = "Service_Charge",
                             receiver_name = f"Winning Gtt-Whot Challenge '{get_member.current_opponent}' Game Charges",
                             amount = "{:,}".format(int(get_game_charges)),
                             charges="",
                             net_balance="{:,}".format(net_debit_balance)
                         )
                         new_member_debit_transaction = get_member.transaction_history.add(create_debit_transaction_history)
+                        create_winning_notification = Notifications.objects.create(
+                            notification_type = "Match_Result",
+                            notification_message = f"You won #{'{:,}'.format(int(get_current_winning_amount))} from your last {get_member.current_game_type} match!"
+                        )
+                        add_notification = get_member.notifications.add(create_winning_notification)
                         # update member
                         new_member_balance = int(get_member.balance) + int(get_current_winning_amount) - int(get_game_charges)
                         member_new_admin_charge = int(get_member.admin_charge) + int(get_game_charges)
                         new_member_no_of_wins = int(get_member.number_of_win) + 1
-                        update_member = Members.objects.filter(id=int(get_player_id)).update(
-                            balance = new_member_balance,
-                            number_of_win = new_member_no_of_wins,
-                            admin_charge=member_new_admin_charge
-                        )
+                        get_member_highest_win = int(get_member.highest_win)
+                        if get_member_highest_win >= int(get_current_winning_amount):
+                            update_member = Members.objects.select_for_update().filter(id=int(get_player_id))
+                            update_member.update(
+                                balance = new_member_balance,
+                                number_of_win = new_member_no_of_wins,
+                                admin_charge=member_new_admin_charge,
+                            )
+                        else:
+                            update_member = Members.objects.select_for_update().filter(id=int(get_player_id))
+                            update_member.update(
+                                balance=new_member_balance,
+                                number_of_win=new_member_no_of_wins,
+                                admin_charge=member_new_admin_charge,
+                                highest_win = int(get_current_winning_amount)
+                            )
                         #Update Member Opponent
-                        get_member_opp_id = User.objects.get(username=get_member.current_opponent).id
+                        get_member_opp_id = User.objects.select_for_update().get(username=get_member.current_opponent).id
                         get_mem_opp = Members.objects.get(id=int(get_member_opp_id))
                         member_opp_new_no_loss = int(get_mem_opp.number_of_loss) + 1
-                        update_member_opp = Members.objects.filter(id=int(get_member_opp_id)).update(
-                            number_of_loss = member_opp_new_no_loss
+                        member_opp_highest_loss = int(get_mem_opp.highest_loss)
+                        create_loss_notification = Notifications.objects.create(
+                            notification_type="Match_Result",
+                            notification_message=f"You Loss #{'{:,}'.format(int(get_mem_opp.current_challenge_amount))} from your last {get_member.current_game_type} match!"
                         )
+                        add_notification = get_mem_opp.notifications.add(
+                            create_loss_notification)
+                        if member_opp_highest_loss >= int(get_mem_opp.current_challenge_amount):
+                            update_member_opp = Members.objects.select_for_update().filter(id=int(get_member_opp_id))
+                            update_member_opp.update(
+                                number_of_loss = member_opp_new_no_loss
+                            )
+                        else:
+                            update_member_opp = Members.objects.select_for_update().filter(id=int(get_member_opp_id))
+                            update_member_opp.update(
+                                number_of_loss=member_opp_new_no_loss,
+                                highest_loss = int(get_mem_opp.current_challenge_amount)
+                            )
                         #update game
-                        update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                        update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                        update_game.update(
                             game_finished = True,
                             game_reload = True
                         )
                     elif get_game.player_two == get_game_winner:
-                        get_player_id = User.objects.get(username=get_game.player_two).id
-                        get_member = Members.objects.get(id=int(get_player_id))
+                        get_player_id = User.objects.select_for_update().get(username=get_game.player_two).id
+                        get_member = Members.objects.select_for_update().get(id=int(get_player_id))
                         get_current_winning_amount = get_member.current_game_wining_amount
                         get_game_charges = get_game.game_charges
                         # Create New Credit Transaction
                         net_credit_balance = int(get_member.balance) + int(get_current_winning_amount)
                         create_credit_transaction_history = Transfer_History.objects.create(
-                            transaction_type="Credit",
-                            sender_name=f"Winning '{get_member.current_opponent}'",
+                            transaction_type="Game_Win",
+                            sender_name=f"Winning '@{get_member.current_opponent}'",
                             amount="{:,}".format(int(get_current_winning_amount)),
                             net_balance="{:,}".format(net_credit_balance)
                         )
@@ -1106,7 +1326,7 @@ class End_Game(View):
                         net_debit_balance = int(get_member.balance) + int(get_current_winning_amount) - int(
                             get_game_charges)
                         create_debit_transaction_history = Transfer_History.objects.create(
-                            transaction_type="Debit",
+                            transaction_type="Service_Charge",
                             receiver_name=f"Winning Gtt-Whot Challenge '{get_member.current_opponent}' Game Charges",
                             amount="{:,}".format(int(get_game_charges)),
                             charges="",
@@ -1114,36 +1334,68 @@ class End_Game(View):
                         )
                         new_member_debit_transaction = get_member.transaction_history.add(
                             create_debit_transaction_history)
+                        create_winning_notification = Notifications.objects.create(
+                            notification_type="Match_Result",
+                            notification_message=f"You won #{'{:,}'.format(int(get_current_winning_amount))} from your last {get_member.current_game_type} match!"
+                        )
+                        add_notification = get_member.notifications.add(create_winning_notification)
                         # update member
                         new_member_balance = int(get_member.balance) + int(get_current_winning_amount) - int(
                             get_game_charges)
                         new_member_admin_charge = int(get_member.admin_charge) + int(get_game_charges)
                         new_member_no_of_wins = int(get_member.number_of_win) + 1
-                        update_member = Members.objects.filter(id=int(get_player_id)).update(
-                            balance=new_member_balance,
-                            number_of_win=new_member_no_of_wins,
-                            admin_charge=new_member_admin_charge
-                        )
+                        get_member_highest_win = int(get_member.highest_win)
+                        if get_member_highest_win >= int(get_current_winning_amount):
+                            update_member = Members.objects.select_for_update().filter(id=int(get_player_id))
+                            update_member.update(
+                                balance=new_member_balance,
+                                number_of_win=new_member_no_of_wins,
+                                admin_charge=new_member_admin_charge
+                            )
+                        else:
+                            update_member = Members.objects.select_for_update().filter(id=int(get_player_id))
+                            update_member.update(
+                                balance=new_member_balance,
+                                number_of_win=new_member_no_of_wins,
+                                admin_charge=new_member_admin_charge,
+                                highest_win=int(get_current_winning_amount)
+                            )
                         # Update Member Opponent
-                        get_member_opp_id = User.objects.get(username=get_member.current_opponent).id
-                        get_mem_opp = Members.objects.get(id=int(get_member_opp_id))
+                        get_member_opp_id = User.objects.select_for_update().get(username=get_member.current_opponent).id
+                        get_mem_opp = Members.objects.select_for_update().get(id=int(get_member_opp_id))
                         member_opp_new_no_loss = int(get_mem_opp.number_of_loss) + 1
-                        update_member_opp = Members.objects.filter(id=int(get_member_opp_id)).update(
-                            number_of_loss=member_opp_new_no_loss
+                        member_opp_highest_loss = int(get_mem_opp.highest_loss)
+                        create_loss_notification = Notifications.objects.create(
+                            notification_type="Match_Result",
+                            notification_message=f"You Loss #{'{:,}'.format(int(get_mem_opp.current_challenge_amount))} from your last {get_member.current_game_type} match!"
                         )
-                        update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                        add_notification = get_mem_opp.notifications.add(
+                            create_loss_notification)
+                        if member_opp_highest_loss >= int(get_mem_opp.current_challenge_amount):
+                            update_member_opp = Members.objects.select_for_update().filter(id=int(get_member_opp_id))
+                            update_member_opp.update(
+                                number_of_loss=member_opp_new_no_loss
+                            )
+                        else:
+                            update_member_opp = Members.objects.select_for_update().filter(id=int(get_member_opp_id))
+                            update_member_opp.update(
+                                number_of_loss=member_opp_new_no_loss,
+                                highest_loss=int(get_mem_opp.current_challenge_amount)
+                            )
+                        update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id))
+                        update_game.update(
                             game_finished=True,
                             game_reload = True
                         )
                     elif get_game_winner == "Draw":
-                        get_member = Members.objects.get(id=int(user_id))
+                        get_member = Members.objects.select_for_update().get(id=int(user_id))
                         get_current_challenge_amount = get_member.current_challenge_amount
                         get_game_charges = int(get_game.game_charges)
                         per_player = get_game_charges/2
                         net_credit_balance = int(get_member.balance) + int(get_current_challenge_amount)
                         create_credit_draw_transaction = Transfer_History.objects.create(
-                            transaction_type = "Credit",
-                            sender_name = f"Draw Gtt-Whott with '{get_member.current_opponent}'",
+                            transaction_type = "Game_Draw",
+                            sender_name = f"Draw Gtt-Whott with '@{get_member.current_opponent}'",
                             amount = int(get_current_challenge_amount),
                             net_balance="{:,}".format(net_credit_balance)
                         )
@@ -1151,8 +1403,8 @@ class End_Game(View):
                         net_debit_balance = int(get_member.balance) + int(get_current_challenge_amount) - int(
                             per_player)
                         create_debit_draw_transactions = Transfer_History.objects.create(
-                            transaction_type = "Debit",
-                            receiver_name = f"Draw Gtt-Whott with '{get_member.current_opponent}' Game Charges",
+                            transaction_type = "Service_Charge",
+                            receiver_name = f"Draw Gtt-Whott with '@{get_member.current_opponent}' Game Charges",
                             amount = int(per_player),
                             charges="",
                             net_balance="{:,}".format(net_debit_balance)
@@ -1161,18 +1413,19 @@ class End_Game(View):
                         new_member_no_of_draw = int(get_member.number_of_draw) + 1
                         new_member_balance = int(get_member.balance) + int(get_current_challenge_amount) - int(per_player)
                         new_member_admin_charge = int(get_member.admin_charge) + int(per_player)
-                        update_member = Members.objects.filter(id=int(user_id)).update(
+                        update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                        update_member.update(
                             balance = new_member_balance,
                             number_of_draw = new_member_no_of_draw,
                             admin_charge=new_member_admin_charge
                         )
                         # Update Member Opponent Draw
-                        mem_opp_id = User.objects.get(username=get_member.current_opponent).id
-                        get_opp_details = Members.objects.get(id=int(mem_opp_id))
+                        mem_opp_id = User.objects.select_for_update().get(username=get_member.current_opponent).id
+                        get_opp_details = Members.objects.select_for_update().get(id=int(mem_opp_id))
                         net_mem_opp_credit_balance = int(get_opp_details.balance) + int(get_current_challenge_amount)
                         create_mem_opp_credit_draw_transaction = Transfer_History.objects.create(
-                            transaction_type="Credit",
-                            sender_name=f"Draw Gtt-Whott with '{get_opp_details.current_opponent}'",
+                            transaction_type="Game_Draw",
+                            sender_name=f"Draw Gtt-Whott with '@{get_opp_details.current_opponent}'",
                             amount=int(get_current_challenge_amount),
                             net_balance="{:,}".format(net_mem_opp_credit_balance)
                         )
@@ -1181,8 +1434,8 @@ class End_Game(View):
                             get_current_challenge_amount) - int(
                             per_player)
                         create_mem_opp_debit_draw_transaction = Transfer_History.objects.create(
-                            transaction_type="Debit",
-                            receiver_name=f"Draw Gtt-Whott with '{get_opp_details.current_opponent}' Game Charges",
+                            transaction_type="Service_Charge",
+                            receiver_name=f"Draw Gtt-Whott with '@{get_opp_details.current_opponent}' Game Charges",
                             amount=int(per_player),
                             charges="",
                             net_balance="{:,}".format(net_mem_opp_debit_balance)
@@ -1191,12 +1444,14 @@ class End_Game(View):
                         new_mem_opp_no_of_draw = int(get_opp_details.number_of_draw) + 1
                         new_mem_opp_balance = int(get_opp_details.balance) + int(get_current_challenge_amount) - int(per_player)
                         new_mem_opp_admin_charge = int(get_opp_details.admin_charge) + int(per_player)
-                        update_member = Members.objects.filter(id=int(mem_opp_id)).update(
+                        update_member = Members.objects.select_for_update().filter(id=int(mem_opp_id))
+                        update_member.update(
                             balance=new_mem_opp_balance,
                             number_of_draw=new_mem_opp_no_of_draw,
                             admin_charge=new_mem_opp_admin_charge
                         )
-                        update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                        update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                        update_game.update(
                             game_finished=True,
                             game_reload=True
                         )
@@ -1208,34 +1463,38 @@ class End_Game(View):
         else:
             return redirect("login_page")
 
+@method_decorator(transaction.atomic,name="dispatch")
 class Finish_Game(View):
     def post(self,request):
         if request.user.is_authenticated:
-            username = request.user.username
             user_id = request.user.id
-            get_member = Members.objects.get(id=int(user_id))
+            get_member = Members.objects.select_for_update().get(id=int(user_id))
             if get_member.game_started:
                 member_current_game_id = get_member.current_game_id
                 if Gtt_Whot.objects.filter(id=int(member_current_game_id)).exists():
-                    get_game = Gtt_Whot.objects.get(id=int(member_current_game_id))
+                    get_game = Gtt_Whot.objects.select_for_update().get(id=int(member_current_game_id))
                     if get_game:
                         # update game
-                        update_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).update(
+                        update_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                        update_game.update(
                             game_finished = True,
                             game_concluded = True,
                             game_reload = True
                         )
                         # update member
-                        update_member = Members.objects.filter(id=int(user_id)).update(
+                        update_member = Members.objects.select_for_update().filter(id=int(user_id))
+                        update_member.update(
                             game_started = False
                         )
                         # get and update mem_opp
                         mem_opp_id = User.objects.get(username=get_member.current_opponent).id
-                        update_mem_opp = Members.objects.filter(id=int(mem_opp_id)).update(
+                        update_mem_opp = Members.objects.select_for_update().filter(id=int(mem_opp_id))
+                        update_mem_opp.update(
                             game_started=False
                         )
                         # delete game
-                        delete_game = Gtt_Whot.objects.filter(id=int(member_current_game_id)).delete()
+                        delete_game = Gtt_Whot.objects.select_for_update().filter(id=int(member_current_game_id))
+                        delete_game.delete()
                         return redirect("gttWhot_game_room_page")
                     else:
                         return redirect("gttWhot_game_room_page")
@@ -1260,7 +1519,7 @@ class Gtt_Whot_Member_Special_Service(View):
             if market_chosen_card_id != "select-option" and player_chosen_card_id != "select-option":
                 if get_member.is_special:
                     if get_member.game_started:
-                        if get_member.current_game_type == "Golden Whot":
+                        if get_member.current_game_type == "whot":
                             member_current_game_id = int(get_member.current_game_id)
                             get_game = Gtt_Whot.objects.get(id=int(member_current_game_id))
                             remove_market_chosen_card = get_game.general_market.remove(int(market_chosen_card_id))

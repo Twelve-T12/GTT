@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 
 from gttWhott.models import Gtt_Whot
-from main.models import Members,Transfer_History,Game_Delay_Report,All_Phone_Numbers
+from main.models import Members,Transfer_History,Game_Delay_Report
 from django.core.mail import EmailMessage
 from django.conf import settings
 from .models import Black_List
@@ -653,14 +653,6 @@ class Admin_Quick_Add_Members_Phone_Numbers(View):
         if request.user.is_authenticated:
             if request.user.is_superuser:
                 get_members = Members.objects.all()
-                for i in get_members:
-                    if not All_Phone_Numbers.objects.filter(phone_number=i.phone_number).exists():
-                        append_phone_number = All_Phone_Numbers.objects.create(
-                            username = i.user,
-                            phone_number = i.phone_number
-                        )
-                    else:
-                        print("phone number dey there before!")
                 messages.info(request,f"completed!")
                 return redirect("admin_private_space_page")
             else:

@@ -2,151 +2,309 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="icon" href="{% static 'image/logo.png' %}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
-    <link rel="stylesheet"  href="{% static '/css/auth.css' %}">
-       <style>
-        body{
-            background-image:url("static/image/bg_img_five.jpeg");
-            background-repeat: no-repeat;
-            background-position:center;
-            background-attachment:fixed;
-            background-size:cover;
-            animation-name:backgrounds;
-            animation-iteration-count:infinite;
-            animation-duration:10s;
-        }
-        @keyframes background{
-            0%{
-                background-image:url("static/image/bg_img_two.jpg");
-            }
-            30%{
-                background-image:url("static/image/bg_img_three.jpg");
-            }
-            50%{
-                background-image:url("static/image/bg_img_four.jpg");
-            }
-            70%{
-                background-image:url("static/image/bg_img_five.jpeg");
-            }
-            100%{
-                background-image:url("static/image/bg_img_one.jpg");
-            }
-        }
-        .labels-colors{
-            font-size:25px;
-            font-family: 'Courier New', monospace;
-            color:black;
-            animation-name:label;
-            animation-iteration-count:infinite;
-            animation-duration:10s;
-            text-shadow: 1px 1px 1px #919191,
-                    1px 2px 1px #919191,
-                    1px 3px 1px #919191,
-                    1px 4px 1px #919191,
-                    1px 5px 1px #919191,
-                    1px 6px 1px #919191,
-                    1px 7px 1px #919191,
-                    1px 8px 1px #919191,
-                    1px 9px 1px #919191,
-                    1px 10px 1px #919191,
-                1px 18px 6px rgba(16,16,16,0.4),
-                1px 22px 10px rgba(16,16,16,0.2),
-                1px 25px 35px rgba(16,16,16,0.2),
-                1px 30px 60px rgba(16,16,16,0.4);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login - GoldenTwelve</title>
+  <link rel="icon" href="{% static 'image/logo.png' %}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+      background-color: #1f1f1f;
+      border-bottom: 1px solid #333;
+    }
+
+    .navbar-brand {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: orange;
+      text-shadow: 2px 2px #000;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .navbar-brand .slogan {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #ffe6b3;
+      text-shadow: 1px 1px #000;
+      animation: fadeInGlow 3s ease-in-out infinite alternate;
+      letter-spacing: 1px;
+    }
+
+    @keyframes fadeInGlow {
+      0% {
+        opacity: 0.4;
+        text-shadow: 0 0 5px orange, 0 0 10px gold, 0 0 15px darkorange;
+      }
+      100% {
+        opacity: 1;
+        text-shadow: 0 0 10px orange, 0 0 20px gold, 0 0 30px orangered;
+      }
+    }
+
+    .navbar-nav .nav-link {
+      color: #fff;
+      margin-right: 10px;
+    }
+
+    .navbar-nav .nav-link:hover {
+      color: orange;
+    }
+
+    .btn-orange {
+      background-color: orange;
+      color: #121212;
+      border: none;
+    }
+
+    .btn-orange:hover {
+      background-color: darkorange;
+    }
+
+    .animated-dice {
+      position: absolute;
+      animation-duration: 12s;
+      animation-iteration-count: infinite;
+      opacity: 0.8;
+      z-index: 1;
+      width: 60px;
+      height: 60px;
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+
+    .dice-1 { top: 10%; left: -60px; animation-name: diceMove1; }
+    .dice-2 { top: 30%; left: -60px; animation-name: diceMove2; }
+    .dice-3 { top: 50%; left: -60px; animation-name: diceMove3; }
+
+    @keyframes diceMove1 {
+      0% { transform: translateX(0) rotate(0deg); background-image: url('https://upload.wikimedia.org/wikipedia/commons/2/2c/Alea_1.png'); }
+      100% { transform: translateX(100vw) rotate(360deg); background-image: url('https://upload.wikimedia.org/wikipedia/commons/f/f4/Alea_6.png'); }
+    }
+
+    @keyframes diceMove2 {
+      0% { transform: translateX(0) rotate(0deg); background-image: url('https://upload.wikimedia.org/wikipedia/commons/2/2f/Alea_3.png'); }
+      100% { transform: translateX(100vw) rotate(360deg); background-image: url('https://upload.wikimedia.org/wikipedia/commons/8/8d/Alea_4.png'); }
+    }
+
+    @keyframes diceMove3 {
+      0% { transform: translateX(0) rotate(0deg); background-image: url('https://upload.wikimedia.org/wikipedia/commons/b/b8/Alea_2.png'); }
+      100% { transform: translateX(100vw) rotate(360deg); background-image: url('https://upload.wikimedia.org/wikipedia/commons/5/55/Alea_5.png'); }
+    }
+
+    .form-section {
+      padding: 100px 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .form-container {
+      max-width: 400px;
+      margin: auto;
+      background-color: #1e1e1e;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    footer {
+      background-color: #000;
+      padding: 20px 0;
+    }
+
+    footer p {
+      margin: 0;
+      color: #888;
+    }
+
+    /* Loader Overlay */
+    #gameLoader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(18, 18, 18, 0.95);
+      z-index: 3000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      visibility:hidden
+    }
+
+    .spinner-border {
+      width: 4rem;
+      height: 4rem;
+      color: orange;
+    }
+
+    .loading-text {
+      margin-top: 20px;
+      font-size: 1.4rem;
+      color: gold;
+      text-shadow: 0 0 10px orangered;
+      animation: pulseText 1.5s infinite;
+    }
+
+    @keyframes pulseText {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
 
 
 
-    </style>
+    /* Alert Styling */
+    .alert {
+      border-left: 6px solid;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      font-weight: 500;
+      font-size: 0.95rem;
+      background-color: #1f1f1f;
+      color: #fff;
+    }
 
+    .message-success {
+      border-color: #28a745;
+      background-color: #1d2d1d;
+      color: #b4f1c2;
+    }
+
+    .message-error {
+      border-color: #dc3545;
+      background-color: #2c1d1d;
+      color: #f5b4b4;
+    }
+  </style>
 </head>
 <body>
-    <div class="top-container text-center">
 
-      
-        <h1 id="top" style="font-size:20px"><img src="{% static 'image/gtt_whot_logo.png' %}"  style="width:100px;height:100px;border-radius:20px;"><br>
-     GoldenTwelveTransaction<br><b style="font-size:20px">let's play whot...</b></h1>
-        
-        <!-- Main Begins -->
-        <main class="container my-5 ">
-            <form  action="login" method="post" enctype="multipart/form-data" onsubmit="loginSpinner()">
-                            {% csrf_token %}
-                              {% for  i in messages %}
-                                <p class="text-danger">{{i}}</p>
-                              {% endfor %}
-
-                <div class="row my-3">
-                    <div class="col-md-6 text-center">
-                            <div class="form-outline form-white mb-4">
-                              <input type="text" id="username" name="username" class="form-control form-control-lg" style="width:200px" placeholder="pete"   required />
-                              <label class="form-label labels-colors">Username <b class="text-danger">*</b></label>
-                          </div>
-                    </div>
-
-                    <div class="col-md-6 text-center">
-                            <div class="form-outline form-white mb-4">
-                                  <input type="password" id="password" name="password" class="form-control form-control-lg" style="width:200px" id="password"  placeholder="********" required/>
-                                  <label class="form-label labels-colors">Password <b class="text-danger">*</b></label>
-                          </div>
-                    </div>
-                </div>
-
-                    <div class="form-outline form-white mb-4">
-                            <input type="checkbox" onclick="showPassword()" id="check_box">
-                            <label class="form-label labels-colors">Show Password</label>
-                          </div>
-
-
-
-                              <button type="submit" id="auth">Login</button>
-
-                              <div>
-                                  <p class="my-3 text-center labels-colors"><a href="{% url 'reset_password' %}" class="labels-colors">Forgot Password?</a></p>
-                              </div>
-
-                           <div id="login_spinner" style="display:none">
-                                <div class="d-flex justify-content-center">
-                                    <button class="text-center labels-colors" type="button" disabled>
-                                        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                                        loading...
-                                    </button>
-                                </div>
-                          </div>
-
-            </form>
-                        <div>
-                            <p class="my-3 text-center labels-colors">Don't have an account? <a href="{% url 'register_page' %}" id="auth">Register</a></p>
-                        </div>
-      </main>
-        <!-- Main Ends -->
-    
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'index_page' %}">
+      GoldenTwelve
+      <small class="slogan text-center">Let's play gold...</small>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="{% url 'games_page' %}">Games</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'how_it_works_page' %}">How It Works</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'terms_conditions_page' %}">Terms & Conditions</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'privacy_page' %}">Privacy</a></li>
+        {% if not user.is_authenticated %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'login_page' %}">Login</a></li>
+          <li class="nav-item"><a class="btn btn-orange ms-2" href="{% url 'register_page' %}">Join Now</a></li>
+        {% else %}
+          <li class="nav-item"><a class="btn btn-orange ms-2" href="{% url 'home_page' %}">My Dashboard</a></li>
+        {% endif %}
+      </ul>
     </div>
+  </div>
+</nav>
 
-    <script>
-        function loginSpinner(){
-            var getLoginButton = document.getElementById("auth");
-            getLoginButton.style.display = "none";
-            var getLoginSpinner =  document.getElementById("login_spinner");
-            getLoginSpinner.style.display = "inline";
-        }
-        //show password function
-        function showPassword(){
-            console.log("SHOW PASS")
-            var getPassword = document.getElementById("password");
-            if(getPassword.type === "password"){
-                    getPassword.type = "text";
-                    getConfirmPassword.type = "text"
-                  }
-            else{
-                    getPassword.type = "password";
-                    getConfirmPassword.type = "password"
-            }
-        }
-    </script>
+{% if messages %}
+  {% for i  in messages %}
+       <!-- Alert Section -->
+  <div class="container mt-4" id="messageContainer">
+    <!-- Sample Success Alert -->
+    <div class="alert alert-dismissible fade show message-{{i.tags}}" role="alert">
+      <strong>{{i.tags}}!</strong> {{i}}.
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% endfor %}
+{% endif %}
+
+<!-- Animated Dice -->
+<div class="animated-dice dice-1"></div>
+<div class="animated-dice dice-2"></div>
+<div class="animated-dice dice-3"></div>
+
+<!-- Login Form -->
+<section class="form-section">
+  <div class="container">
+    <div class="form-container">
+      <h2 class="text-center mb-4">Login</h2>
+      <form action="login" method="post" enctype="multipart/form-data" onsubmit="loginSpinner()">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" class="form-control" name="username" id="username" placeholder="Enter your username" required>
+        </div>
+        <div class="mb-3">
+          <label for="login-password" class="form-label">Password</label>
+          <input type="password" class="form-control" name="password" id="login-password" placeholder="Enter your password" required>
+        </div>
+        <div class="mb-3 form-check">
+          <input type="checkbox" class="form-check-input" id="show-password" onclick="togglePassword()">
+          <label class="form-check-label" for="show-password">Show Password</label>
+        </div>
+        <div class="mb-3 form-check">
+          <input type="checkbox" class="form-check-input" id="catch">
+          <label class="form-check-label" for="show-password">Remember me for 30 days?</label>
+        </div>
+        <div class="mb-3 text-end">
+          <a href="{% url 'reset_password' %}" class="text-warning">Forgot Password?</a>
+        </div>
+        <button type="submit" class="btn btn-orange w-100">Login</button>
+        <p class="text-center mt-3">Don't have an account? <a href="{% url 'register_page' %}" class="text-warning">Sign Up</a></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+
+<!-- Game Loader Overlay -->
+  <div id="gameLoader">
+    <div class="spinner-border" role="status"></div>
+    <div class="loading-text mt-3">Authenticating...</div>
+  </div>
+
+
+
+<!-- Footer -->
+<footer class="text-center text-white">
+  <div class="container">
+    <p>&copy; 2025 GoldenTwelve. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  setTimeout(() => {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        const bsAlert = new bootstrap.Alert(alert);
+        bsAlert.close();
+      });
+  }, 3000); // Auto dismiss after 3 seconds
+
+
+
+  function togglePassword() {
+    const passwordInput = document.getElementById('login-password');
+    passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+  }
+
+  function loginSpinner(){
+    var getGameSpinner = document.getElementById("gameLoader");
+    getGameSpinner.style.visibility = "visible";
+  }
+</script>
 </body>
 </html>

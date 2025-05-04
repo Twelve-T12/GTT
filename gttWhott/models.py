@@ -41,6 +41,7 @@ class Gtt_Whot(models.Model):
     player_one_amount_of_cards = models.IntegerField(default=0,null=True,blank=True)
     player_two_amount_of_cards = models.IntegerField(default=0, null=True, blank=True)
     player_won = models.BooleanField(default=False,null=True,blank=True)
+    game_timer = models.IntegerField(default=60,null=True,blank=True)
 
     def __str__(self):
         return f"{self.player_one} VS {self.player_two}"
