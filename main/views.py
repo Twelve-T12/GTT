@@ -770,7 +770,7 @@ class DepositPage(View):
             email = request.user.email
             amount = request.POST["amount"]
             print(f"amount::{amount}")
-            callback_url = f'http://127.0.0.1:8000/{amount}/confirmDeposit/response'
+            callback_url = f'https://goldentwelve.onrender.com/{amount}/confirmDeposit/response'
             response = initialize_transaction(email, amount, callback_url)
             print(response)
 
