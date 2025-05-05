@@ -267,7 +267,7 @@
   </button>
 
   <!-- Message Input -->
-  <form class="message-input-area" action="/message/{{room_id}}/{{chat_one}}/{{chat_two}}" method="post" enctype="multipart/form-data" onsubmit="sendMessage()">
+  <form class="message-input-area" action="/message/{{room_id}}/{{chat_one}}/{{chat_two}}" method="post" enctype="multipart/form-data" onsubmit="sendMessage(event)">
     {% csrf_token %}
     <input class="text-area" name="message" placeholder="Type a message..." id="messageBox" required>
     <button type="submit" class="send-btn"><i class="fas fa-paper-plane"></i></button>
@@ -305,7 +305,7 @@
     }
 
 
-    function sendMessage(){
+    function sendMessage(event){
       event.preventDefault();
       var message = document.getElementById("messageBox");
       console.log(message.value);
@@ -366,7 +366,7 @@
     }
   };
 
-    <!-- SSE CONNECTION -->
+    // SSE CONNECTION
     const sse = new EventSource("/events/");
     let lastMessageDate = null;
     sse.onmessage = function(event){
